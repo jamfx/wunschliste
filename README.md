@@ -1,5 +1,8 @@
 [English](#english) | [Deutsch](#deutsch)
 
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](LICENSE.txt)
+![PHP](https://img.shields.io/badge/PHP-%3E%3D8.1-777bb4.svg)
+
 <a id="deutsch"></a>
 # Wunschliste
 
