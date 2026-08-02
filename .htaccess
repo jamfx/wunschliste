@@ -1,0 +1,28 @@
+Options -Indexes
+
+RewriteEngine On
+
+# -----------------------------------------------------------------------
+# Block direct web access to sensitive directories
+# (belt-and-suspenders alongside per-directory .htaccess files)
+# -----------------------------------------------------------------------
+RewriteRule ^(src|templates|config|lang|vendor|migrations)(/|$) - [F,L]
+
+# -----------------------------------------------------------------------
+# Block direct access to cleanup.php and install.php.done via browser
+# -----------------------------------------------------------------------
+RewriteRule ^cleanup\.php$ - [F,L]
+RewriteRule ^install\.php\.done$ - [F,L]
+
+# -----------------------------------------------------------------------
+# Block PHP execution inside uploads/ (allow static files only)
+# Relative path so this works in subdirectory installs too.
+# -----------------------------------------------------------------------
+RewriteRule ^uploads/.*\.php$ - [F,L]
+
+# -----------------------------------------------------------------------
+# Front-controller: route everything else through index.php
+# -----------------------------------------------------------------------
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
