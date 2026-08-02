@@ -1,3 +1,6 @@
+[English](#english) | [Deutsch](#deutsch)
+
+<a id="deutsch"></a>
 # Wunschliste
 
 Ein leichtgewichtiges, datenschutzfreundliches Tool zur Koordination von Mitbringlisten – wer bringt was zu gemeinsamen Veranstaltungen?
@@ -33,10 +36,14 @@ Eine Live-Demo findest du unter: **[wunschliste.n-systeme.de](https://wunschlist
 Alle Einstellungen (Titel, Farben, Logo, E-Mail, Sprache) können nach der Installation über das Admin-Backend verwaltet werden. Die Datenbank-Konfiguration wird während der Installation automatisch erstellt.
 
 ---
-
+<a id="english"></a>
 # Wunschliste (English)
 
 A lightweight, privacy-conscious potluck coordination tool for organizing who brings what to shared events.
+
+## 🔗 Demo
+
+You can see a Live-Demo at: **[wunschliste.n-systeme.de](https://wunschliste.n-systeme.de)**
 
 ## Features
 
