@@ -68,6 +68,22 @@ All settings (title, colors, logo, email, language) can be managed through the a
 
 ## License / Lizenz
 
-Wunschliste is free software licensed under the GNU General Public License v3.0 or later. See the [LICENSE](LICENSE.txt) file for the full license text.
+Wunschliste is free software licensed under the GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later). See the [LICENSE](LICENSE.txt) file for the full license text.
 
 Copyright (C) 2026 Niko Winckel - n-Systeme.de
+
+### Third-party components / Drittanbieter-Komponenten
+
+This project bundles the following third-party libraries, each under its own license:
+
+- [Font Awesome Free](https://fontawesome.com) 7.2.0 — Icons: [CC BY 4.0](https://fontawesome.com/license/free), Fonts: [SIL OFL 1.1](https://fontawesome.com/license/free), Code: [MIT](https://fontawesome.com/license/free)
+- [Dompdf](https://github.com/dompdf/dompdf) — LGPL-2.1
+- [php-font-lib](https://github.com/dompdf/php-font-lib) — LGPL-2.1-or-later
+- [php-svg-lib](https://github.com/dompdf/php-svg-lib) — LGPL-3.0-or-later
+- [endroid/qr-code](https://github.com/endroid/qr-code) — MIT
+- [bacon/bacon-qr-code](https://github.com/Bacon/BaconQrCode) — BSD-2-Clause
+- [dasprid/enum](https://github.com/DASPRiD/Enum) — BSD-2-Clause
+- [lbuchs/webauthn](https://github.com/lbuchs/WebAuthn) — MIT
+- [masterminds/html5](https://github.com/Masterminds/html5-php) — MIT
+- [sabberworm/php-css-parser](https://github.com/sabberworm/PHP-CSS-Parser) — MIT
+- [thecodingmachine/safe](https://github.com/thecodingmachine/safe) — MIT

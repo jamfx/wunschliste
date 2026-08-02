@@ -12,3 +12,8 @@ coverage/
 cache/
 tmp/
 logs/
+
+# Claude Code (lokale/persönliche Einstellungen, nicht teilen)
+.claude/settings.local.json
+CLAUDE.local.md
+.mcp.local.json

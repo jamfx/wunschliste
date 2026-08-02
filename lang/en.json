@@ -244,7 +244,7 @@
     "admin.design_logo_remove": "Remove Logo",
     "admin.design_imprint": "Imprint (HTML allowed)",
     "admin.design_privacy": "Privacy Policy (HTML allowed)",
-    "admin.design_license_url": "GPLv3 link in footer",
+    "admin.design_license_url": "AGPLv3 link in footer",
     "admin.design_license_url_hint": "Optional. Leave blank: text is shown as plain text. With a URL: text becomes a link (opens in a new tab).",
     "admin.email_transport": "Delivery Method",
     "admin.email_smtp_host": "SMTP Host",
@@ -278,7 +278,7 @@
     "legal.privacy_title": "Privacy Policy",
     "help.footer_link": "Help & FAQ",
     "help.title": "Guide & FAQ",
-    "footer.license_text": "This wishlist software is freely published under the GNU/GPLv3 license.",
+    "footer.license_text": "This wishlist software is freely published under the GNU/AGPLv3 license.",
     "cookie.message": "This website uses cookies for session management.",
     "cookie.accept": "Got it"
 }

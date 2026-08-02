@@ -244,7 +244,7 @@
     "admin.design_logo_remove": "Logo entfernen",
     "admin.design_imprint": "Impressum (HTML erlaubt)",
     "admin.design_privacy": "Datenschutzerklärung (HTML erlaubt)",
-    "admin.design_license_url": "GPLv3-Link im Footer",
+    "admin.design_license_url": "AGPLv3-Link im Footer",
     "admin.design_license_url_hint": "Optional. Leer lassen: Text wird als reiner Text angezeigt. Mit URL: Text wird zum Link (öffnet in neuem Fenster).",
     "admin.email_transport": "Versandmethode",
     "admin.email_smtp_host": "SMTP-Host",
@@ -278,7 +278,7 @@
     "legal.privacy_title": "Datenschutzerklärung",
     "help.footer_link": "Hilfe & FAQ",
     "help.title": "Anleitung & FAQ",
-    "footer.license_text": "Diese Wunschlisten-Software ist kostenlos unter der GNU/GPLv3 veröffentlicht.",
+    "footer.license_text": "Diese Wunschlisten-Software ist kostenlos unter der GNU/AGPLv3 veröffentlicht.",
     "cookie.message": "Diese Website verwendet Cookies für die Sitzungsverwaltung.",
     "cookie.accept": "Verstanden"
 }

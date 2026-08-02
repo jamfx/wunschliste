@@ -92,7 +92,7 @@ $licenseUrl   = $s['license_url']   ?? '';
                 </p>
                 <input class="form-input" type="url" id="license_url" name="license_url"
                        value="<?= h($licenseUrl) ?>" maxlength="500"
-                       placeholder="https://www.gnu.org/licenses/gpl-3.0.html">
+                       placeholder="https://www.gnu.org/licenses/agpl-3.0.html">
                 <p class="form-hint"><?= h(__('admin.design_license_url_hint')) ?></p>
             </div>
 
