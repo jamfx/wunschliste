@@ -2,6 +2,10 @@
 
 Ein leichtgewichtiges, datenschutzfreundliches Tool zur Koordination von Mitbringlisten – wer bringt was zu gemeinsamen Veranstaltungen?
 
+## 🔗 Demo
+
+Eine Live-Demo findest du unter: **[wunschliste.n-systeme.de](https://wunschliste.n-systeme.de)**
+
 ## Funktionen
 
 - **Eventverwaltung** – Events mit Artikellisten erstellen und über sichere Admin-Links verwalten
@@ -20,7 +24,7 @@ Ein leichtgewichtiges, datenschutzfreundliches Tool zur Koordination von Mitbrin
 
 ## Installation
 
-1. Alle Dateien (inkl. `vendor/`-Verzeichnis) auf den Webserver hochladen.
+1. Alle Dateien auf den Webserver hochladen.
 2. Das Installationsskript im Browser aufrufen und dem Setup-Assistenten folgen.
 3. Nach der Installation das Installationsskript löschen oder absichern.
 
