@@ -1,34 +1,72 @@
+-- Base schema for fresh installs (run once by install.php).
+--
+-- This file is kept up to date with the current schema — it is only ever
+-- consumed by a brand-new installation, never re-run against an existing
+-- database. Existing installations upgrading from an older version get
+-- there via the numbered migration files instead (see migrations/002_*.sql
+-- onward and UPGRADE.md); those files are historical and stay untouched.
+
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
 SET foreign_key_checks = 0;
 
-CREATE TABLE IF NOT EXISTS `admin` (
+-- Unified account table for the SuperAdmin and invited registered users
+-- (see UPGRADE.md's 1.1.0 entry for background — this used to be a
+-- SuperAdmin-only `admin` table).
+CREATE TABLE IF NOT EXISTS `users` (
     `id`             INT AUTO_INCREMENT PRIMARY KEY,
     `email`          VARCHAR(255) UNIQUE NOT NULL,
-    `password_hash`  VARCHAR(255) NOT NULL,
+    `password_hash`  VARCHAR(255) NULL
+        COMMENT 'NULL until an invited user sets their password',
+    `role`           ENUM('superadmin','user') NOT NULL DEFAULT 'user',
+    `status`         ENUM('active','disabled') NOT NULL DEFAULT 'active',
     `totp_secret`    VARCHAR(255) NULL,
     `totp_enabled`   TINYINT(1) DEFAULT 0,
     `recovery_codes` TEXT NULL,
     `created_at`     DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- WebAuthn credentials (passkeys) for SuperAdmin login.
--- Recovery codes remain in admin.recovery_codes (JSON column) — no new table needed.
-CREATE TABLE IF NOT EXISTS `admin_passkeys` (
+-- WebAuthn credentials (passkeys) for any user account.
+CREATE TABLE IF NOT EXISTS `user_passkeys` (
     `id`            INT AUTO_INCREMENT PRIMARY KEY,
-    `admin_id`      INT NOT NULL,
+    `user_id`       INT NOT NULL,
     `credential_id` VARCHAR(512) NOT NULL,
     `public_key`    TEXT NOT NULL,
     `sign_counter`  INT UNSIGNED NOT NULL DEFAULT 0,
     `device_name`   VARCHAR(100) NOT NULL DEFAULT 'Passkey',
     `created_at`    DATETIME DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY `uniq_credential` (`credential_id`(191)),
-    FOREIGN KEY (`admin_id`) REFERENCES `admin`(`id`) ON DELETE CASCADE
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Invitation links: SuperAdmin creates a `users` row, an invite token is
+-- mailed out and is valid for 24h; the user follows it to set a password.
+CREATE TABLE IF NOT EXISTS `user_invites` (
+    `id`         INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id`    INT NOT NULL,
+    `token`      VARCHAR(64) UNIQUE NOT NULL,
+    `expires_at` DATETIME NOT NULL,
+    `used_at`    DATETIME NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- "Forgot password" flow, same token+expiry shape as invites.
+CREATE TABLE IF NOT EXISTS `password_resets` (
+    `id`         INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id`    INT NOT NULL,
+    `token`      VARCHAR(64) UNIQUE NOT NULL,
+    `expires_at` DATETIME NOT NULL,
+    `used_at`    DATETIME NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `events` (
     `id`                INT AUTO_INCREMENT PRIMARY KEY,
     `admin_token`       VARCHAR(64) UNIQUE NOT NULL,
+    `user_id`           INT NULL
+        COMMENT 'NULL = no owner, admin_token link alone is sufficient to manage this list',
     `guest_token`       VARCHAR(64) UNIQUE NOT NULL,
     `title`             VARCHAR(255) NOT NULL,
     `description`       TEXT NULL,
@@ -43,7 +81,8 @@ CREATE TABLE IF NOT EXISTS `events` (
     `gift_mode`         TINYINT(1) NOT NULL DEFAULT 0
         COMMENT 'Geschenkmodus: 1 = übernommene Items werden ausgeblendet',
     `created_at`        DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `expires_at`        DATETIME NULL
+    `expires_at`        DATETIME NULL,
+    CONSTRAINT `fk_events_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `items` (
@@ -73,7 +112,7 @@ CREATE TABLE IF NOT EXISTS `claims` (
     `finalize_at` DATETIME DEFAULT NULL
         COMMENT 'Zeitpunkt, ab dem die Übernahme final ist und die Ersteller-Mail verschickt werden darf',
     `creator_notified_at` DATETIME DEFAULT NULL
-        COMMENT 'Wann die Ersteller-Mail für diese Übernahme (versucht) verschickt wurde; NULL = noch ausstehend',
+        COMMENT 'Wann die Ersteller-Mail für diese Übernahme (versucht) verschickt wurde — NULL = noch ausstehend',
     CONSTRAINT `fk_claims_item` FOREIGN KEY (`item_id`) REFERENCES `items`(`id`) ON DELETE CASCADE,
     INDEX `idx_claims_pending_notify` (`creator_notified_at`, `finalize_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

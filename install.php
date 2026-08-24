@@ -67,19 +67,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // Run migrations (001 = base schema, 002 = users/multi-account support;
-        // both are applied in order for every fresh install)
+        // Run the base schema. 001_initial.sql is kept up to date with the
+        // current schema (users/multi-account tables included) — it's only
+        // ever used here, for a brand-new install. Existing installations
+        // upgrade via the numbered migration files instead (see UPGRADE.md).
         if (empty($errors) && $pdo !== null) {
             try {
-                foreach (['001_initial.sql', '002_multi_user.sql'] as $file) {
-                    $sql        = file_get_contents(BASE_DIR . '/migrations/' . $file);
-                    $statements = array_filter(
-                        array_map('trim', explode(';', $sql)),
-                        fn($s) => $s !== ''
-                    );
-                    foreach ($statements as $stmt) {
-                        $pdo->exec($stmt);
-                    }
+                $sql = file_get_contents(BASE_DIR . '/migrations/001_initial.sql');
+                foreach (split_sql_statements($sql) as $stmt) {
+                    $pdo->exec($stmt);
                 }
             } catch (PDOException $e) {
                 $errors[] = 'Datenbankschema konnte nicht erstellt werden: ' . $e->getMessage();

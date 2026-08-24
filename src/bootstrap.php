@@ -687,6 +687,60 @@ function current_url(): string
     return $scheme . '://' . $host . ($_SERVER['REQUEST_URI'] ?? '/');
 }
 
+/**
+ * Splits a .sql file's contents into individual statements. A naive
+ * explode(';', ...) breaks as soon as a semicolon appears inside a quoted
+ * string (e.g. a column COMMENT with punctuation) or inside a `-- ...`
+ * line comment — this tracks both, so embedded semicolons there aren't
+ * mistaken for statement terminators.
+ */
+function split_sql_statements(string $sql): array
+{
+    $statements    = [];
+    $current       = '';
+    $inString      = false;
+    $inLineComment = false;
+    $len           = strlen($sql);
+
+    for ($i = 0; $i < $len; $i++) {
+        $char = $sql[$i];
+        $current .= $char;
+
+        if ($inLineComment) {
+            if ($char === "\n") {
+                $inLineComment = false;
+            }
+            continue;
+        }
+
+        if ($inString) {
+            if ($char === "'" && $sql[$i - 1] !== '\\') {
+                $inString = false;
+            }
+            continue;
+        }
+
+        if ($char === "'") {
+            $inString = true;
+        } elseif ($char === '-' && ($sql[$i + 1] ?? '') === '-') {
+            $inLineComment = true;
+        } elseif ($char === ';') {
+            $stmt = trim(substr($current, 0, -1));
+            if ($stmt !== '') {
+                $statements[] = $stmt;
+            }
+            $current = '';
+        }
+    }
+
+    $stmt = trim($current);
+    if ($stmt !== '') {
+        $statements[] = $stmt;
+    }
+
+    return $statements;
+}
+
 /** Best-effort client IP (first trusted value found). */
 function client_ip(): string
 {

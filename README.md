@@ -38,7 +38,7 @@ Eine Live-Demo findest du unter: **[wunschliste.n-systeme.de](https://wunschlist
 
 ## Update
 
-Aktualisierst du eine bestehende Installation (nicht neu installieren), folge der **[Upgrade-Anleitung](UPGRADE.md)** — insbesondere ab Version 1.1.0 ist dafür ein einmaliger Datenbank-Migrationsschritt nötig.
+Aktualisierst du eine bestehende Installation (nicht neu installieren), folge der **[Upgrade-Anleitung](UPGRADE.md)** — insbesondere ab Version 1.1.0 ist dafür ein einmaliger Datenbank-Migrationsschritt nötig. Was sich zwischen den Versionen im Detail geändert hat, steht im **[Changelog](CHANGELOG.md)**.
 
 ## Konfiguration
 
@@ -79,7 +79,7 @@ You can see a Live-Demo at: **[wunschliste.n-systeme.de](https://wunschliste.n-s
 
 ## Updating
 
-Updating an existing installation (not a fresh install)? Follow the **[upgrade guide](UPGRADE.md)** — starting with version 1.1.0, this requires a one-time database migration step.
+Updating an existing installation (not a fresh install)? Follow the **[upgrade guide](UPGRADE.md)** — starting with version 1.1.0, this requires a one-time database migration step. See the **[changelog](CHANGELOG.md)** for what changed between versions.
 
 ## Configuration
 
