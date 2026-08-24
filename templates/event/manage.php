@@ -16,14 +16,15 @@ $progressPct = $progressTotal > 0
 $adminToken  = $event['admin_token'];
 ?>
 
-<?php if (!empty($_SESSION['admin_logged_in'])): ?>
-<!-- Only shown when viewing as the logged-in site super-admin (jumped in -->
-<!-- from the admin dashboard) — regular organisers only ever have their -->
-<!-- admin_token link and have no admin panel to return to.              -->
+<?php if (!empty($_SESSION['user_logged_in'])): ?>
+<!-- Shown when viewing as a logged-in account (SuperAdmin or the list's -->
+<!-- owner) — organisers without an account only ever have their         -->
+<!-- admin_token link and have no dashboard to return to.                -->
 <div style="margin-bottom:.75rem;">
-    <a href="<?= h(base_url('admin/dashboard')) ?>" class="text-sm" style="color:var(--text-muted);">
+    <a href="<?= h(base_url(($_SESSION['user_role'] ?? '') === 'superadmin' ? 'admin/dashboard' : 'my/lists')) ?>"
+       class="text-sm" style="color:var(--text-muted);">
         <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-        <?= h(__('admin.back_to_dashboard')) ?>
+        <?= h(__('admin.back_to_overview')) ?>
     </a>
 </div>
 <?php endif; ?>

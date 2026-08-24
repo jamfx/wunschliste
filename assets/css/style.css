@@ -78,7 +78,11 @@ p:last-child { margin-bottom: 0; }
 }
 
 .container--wide {
-    max-width: 1100px;
+    /* Scales with the viewport instead of a fixed width, so wide-column
+       tables (dashboard, user list) get the room they need on wide screens
+       without leaving large unused margins — while still capping growth on
+       ultra-wide monitors and never exceeding the viewport itself. */
+    max-width: min(96vw, 1600px);
 }
 
 main.container {

@@ -66,6 +66,7 @@ class PdfExportController
         $adminToken = $params['admin_token'] ?? '';
 
         [$event, $items] = $this->loadEventWithItems($adminToken, true);
+        require_event_owner_access($event);
 
         if (!class_exists('Dompdf\Dompdf')) {
             flash('error', 'PDF-Export nicht verfügbar (Composer-Paket dompdf fehlt).');

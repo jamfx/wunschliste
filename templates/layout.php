@@ -133,9 +133,9 @@ $flashMessages = get_flash();
         <span class="text-muted text-sm" style="flex-basis:100%;">
             <i class="fa-brands fa-osi" aria-hidden="true"></i>
             <?php if (!empty($licenseUrl)): ?>
-            <a href="<?= h($licenseUrl) ?>" target="_blank" rel="noopener noreferrer"><?= h(__('footer.license_text')) ?></a>
+            <a href="<?= h($licenseUrl) ?>" target="_blank" rel="noopener noreferrer"><?= h(__('footer.license_text', ['version' => APP_VERSION])) ?></a>
             <?php else: ?>
-            <?= h(__('footer.license_text')) ?>
+            <?= h(__('footer.license_text', ['version' => APP_VERSION])) ?>
             <?php endif; ?>
         </span>
     </div>

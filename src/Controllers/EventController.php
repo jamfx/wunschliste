@@ -8,10 +8,29 @@ class EventController
     // ------------------------------------------------------------------
     public function create(array $params = []): void
     {
+        if (list_creation_mode() === 'restricted' && current_user_id() === null) {
+            $_SESSION['login_redirect'] = current_url();
+            flash('error', 'Bitte einloggen, um eine neue Liste zu erstellen.');
+            redirect(base_url('admin/login'));
+        }
+
+        // Pre-fill the notification email for logged-in users — it's already
+        // known, so the "no email = no notifications" hint has no reason to
+        // fire. Still just a default: the field stays editable/clearable.
+        $old = [];
+        $userId = current_user_id();
+        if ($userId !== null) {
+            global $db;
+            $user = $db->fetch('SELECT email FROM users WHERE id = ?', [$userId]);
+            if ($user) {
+                $old['creator_email'] = $user['email'];
+            }
+        }
+
         render('event/create', [
             'pageTitle' => __('event.create_title'),
             'errors'    => [],
-            'old'       => [],
+            'old'       => $old,
         ]);
     }
 
@@ -23,6 +42,13 @@ class EventController
         global $db;
 
         if (!csrf_verify()) {
+            abort(403);
+        }
+
+        // Belt-and-suspenders: the GET form already redirects anonymous
+        // visitors to login in restricted mode, but a direct POST must be
+        // blocked too.
+        if (list_creation_mode() === 'restricted' && current_user_id() === null) {
             abort(403);
         }
 
@@ -84,6 +110,7 @@ class EventController
         $db->insert('events', [
             'admin_token'          => $adminToken,
             'guest_token'          => $guestToken,
+            'user_id'              => current_user_id(),
             'title'                => $old['title'],
             'description'          => $old['description'] !== '' ? $old['description'] : null,
             'event_date'           => $eventDate,
@@ -128,6 +155,53 @@ class EventController
     }
 
     // ------------------------------------------------------------------
+    // GET /my/lists — a logged-in user's own lists (any role)
+    // ------------------------------------------------------------------
+    public function myLists(array $params = []): void
+    {
+        $userId = current_user_id();
+        if ($userId === null) {
+            redirect(base_url('admin/login'));
+        }
+
+        global $db;
+
+        // Same weighting logic as AdminController::dashboard(), just scoped
+        // to the current user's own lists.
+        $events = $db->fetchAll(
+            'SELECT e.*,
+                (SELECT COALESCE(SUM(quantity), 0) FROM items
+                 WHERE event_id = e.id AND status = "approved") AS item_count,
+                (SELECT COALESCE(SUM(
+                    LEAST(i2.quantity, (SELECT COALESCE(SUM(c.quantity), 0)
+                                        FROM claims c WHERE c.item_id = i2.id))
+                 ), 0)
+                 FROM items i2
+                 WHERE i2.event_id = e.id AND i2.status = "approved"
+                ) AS claimed_count
+             FROM events e
+             WHERE e.user_id = ?
+             ORDER BY e.created_at DESC',
+            [$userId]
+        );
+
+        $now = time();
+        foreach ($events as &$event) {
+            $event['is_expired']   = $event['expires_at'] !== null
+                                   && strtotime($event['expires_at']) < $now;
+            $event['progress_pct'] = $event['item_count'] > 0
+                ? round(($event['claimed_count'] / $event['item_count']) * 100)
+                : 0;
+        }
+        unset($event);
+
+        render('event/my_lists', [
+            'pageTitle' => 'Meine Listen',
+            'events'    => $events,
+        ]);
+    }
+
+    // ------------------------------------------------------------------
     // GET /e/{admin_token}/manage
     // ------------------------------------------------------------------
     public function manage(array $params = []): void
@@ -142,6 +216,7 @@ class EventController
         if (!$event) {
             abort(404);
         }
+        require_event_owner_access($event);
 
         // Load all items for this event
         $allItems = $db->fetchAll(
@@ -197,6 +272,7 @@ class EventController
         if (!$event) {
             abort(404);
         }
+        require_event_owner_access($event);
 
         render('event/edit', [
             'pageTitle' => event_page_title($event),
@@ -226,6 +302,7 @@ class EventController
         if (!$event) {
             abort(404);
         }
+        require_event_owner_access($event);
 
         $old = [
             'title'              => trim($_POST['title']              ?? ''),
@@ -314,6 +391,7 @@ class EventController
         if (!$event) {
             abort(404);
         }
+        require_event_owner_access($event);
 
         // Cascades to items and claims via FK ON DELETE CASCADE.
         $db->delete('events', ['id' => $event['id']]);

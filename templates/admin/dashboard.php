@@ -56,6 +56,7 @@
                 <thead>
                     <tr>
                         <th>Titel</th>
+                        <th>Besitzer</th>
                         <th>Datum</th>
                         <th><?= h(__('admin.items_column')) ?></th>
                         <th>Fortschritt</th>
@@ -72,6 +73,9 @@
                            style="font-weight:600;">
                             <?= h($event['title']) ?>
                         </a>
+                    </td>
+                    <td class="text-sm text-muted">
+                        <?= !empty($event['owner_email']) ? h($event['owner_email']) : '— (Token-only)' ?>
                     </td>
                     <td class="text-sm text-muted">
                         <?= !empty($event['event_date']) ? h(date('d.m.Y', strtotime($event['event_date']))) : '—' ?>

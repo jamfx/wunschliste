@@ -8,11 +8,13 @@ $currentAdminPage = $currentAdminPage ?? '';
 
 $navItems = [
     'dashboard'    => ['url' => base_url('admin/dashboard'),     'icon' => 'fa-solid fa-gauge-high',       'label' => __('admin.dashboard_title')],
+    'users'        => ['url' => base_url('admin/users'),          'icon' => 'fa-solid fa-users',            'label' => __('admin.settings_users')],
     'design'       => ['url' => base_url('admin/settings/design'),'icon' => 'fa-solid fa-palette',          'label' => __('admin.settings_design')],
     'email'        => ['url' => base_url('admin/email'),          'icon' => 'fa-solid fa-envelope',         'label' => __('admin.settings_email')],
     'pdf'          => ['url' => base_url('admin/pdf-settings'),   'icon' => 'fa-solid fa-file-pdf',         'label' => __('admin.settings_pdf')],
     'security'     => ['url' => base_url('admin/settings/security'), 'icon' => 'fa-solid fa-lock',          'label' => __('admin.settings_security')],
     'cleanup'      => ['url' => base_url('admin/settings/cleanup'),  'icon' => 'fa-solid fa-broom',         'label' => __('admin.settings_cleanup')],
+    'account_security' => ['url' => base_url('account/security'),   'icon' => 'fa-solid fa-shield-halved', 'label' => __('admin.account_security')],
 ];
 ?>
 <aside class="admin-sidebar">

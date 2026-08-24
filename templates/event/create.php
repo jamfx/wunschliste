@@ -23,6 +23,16 @@ $v = [
 
 <div style="max-width:640px;margin-inline:auto;">
 
+    <?php if (!empty($_SESSION['user_logged_in'])): ?>
+    <div style="margin-bottom:.75rem;">
+        <a href="<?= h(base_url(($_SESSION['user_role'] ?? '') === 'superadmin' ? 'admin/dashboard' : 'my/lists')) ?>"
+           class="text-sm" style="color:var(--text-muted);">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+            <?= h(__('admin.back_to_overview')) ?>
+        </a>
+    </div>
+    <?php endif; ?>
+
     <h1 style="margin-bottom:1.5rem;">
         <i class="fa-solid fa-calendar-plus" aria-hidden="true" style="color:var(--primary-color);margin-right:.4rem;"></i>
         <?= h(__('event.create_title')) ?>

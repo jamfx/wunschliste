@@ -15,19 +15,16 @@ class AdminController
         return base64_decode($data . str_repeat('=', (4 - strlen($data) % 4) % 4));
     }
 
-    private function generateRecoveryCodes(): array
-    {
-        $codes = [];
-        for ($i = 0; $i < 8; $i++) {
-            $codes[] = strtoupper(bin2hex(random_bytes(4)));
-        }
-        return $codes;
-    }
-
     private function checkAuth(): void
     {
-        if (empty($_SESSION['admin_logged_in'])) {
+        if (empty($_SESSION['user_logged_in'])) {
             redirect(base_url('admin/login'));
+        }
+        // Everything in this controller (dashboard-over-all-events, site-wide
+        // settings, email/PDF config, user management) is SuperAdmin-only.
+        // Regular users get their own area once that exists (see Phase 4).
+        if (($_SESSION['user_role'] ?? '') !== 'superadmin') {
+            abort(403);
         }
         // 30-minute inactivity timeout
         if (isset($_SESSION['admin_last_activity']) && (time() - $_SESSION['admin_last_activity']) > 1800) {
@@ -42,14 +39,57 @@ class AdminController
         $_SESSION['admin_last_activity'] = time();
     }
 
-    private function getAdminRow(): array
+    private function getCurrentUser(): array
     {
         global $db;
-        $admin = $db->fetch('SELECT * FROM admin LIMIT 1');
-        if (!$admin) {
+        $user = $db->fetch('SELECT * FROM users WHERE id = ?', [(int) ($_SESSION['user_id'] ?? 0)]);
+        if (!$user) {
             abort(500);
         }
-        return $admin;
+        return $user;
+    }
+
+    /**
+     * Establishes a logged-in session (password-only, TOTP, or passkey path)
+     * and rotates the session id. Shared so all three login paths stay in
+     * sync. Does not redirect/respond — callers differ (HTML redirect vs.
+     * JSON response for the passkey API), so they do that themselves.
+     */
+    private function establishSession(array $user): void
+    {
+        $_SESSION['user_logged_in'] = true;
+        $_SESSION['user_id']        = $user['id'];
+        $_SESSION['user_role']      = $user['role'];
+        unset(
+            $_SESSION['user_totp_pending'],
+            $_SESSION['user_id_pending'],
+            $_SESSION['totp_attempts']
+        );
+        session_regenerate_id(true);
+
+        // Remove installer on first login (belt-and-suspenders in case unlink inside install.php failed)
+        foreach ([BASE_DIR . '/install.php', BASE_DIR . '/install.php.done'] as $f) {
+            if (file_exists($f)) {
+                @unlink($f);
+            }
+        }
+    }
+
+    /** Redirect target after a successful login, based on role. */
+    /**
+     * Redirect target after a successful login. Prefers whatever page sent
+     * the user to login in the first place (e.g. an owned list's manage
+     * page, or the create-list form in restricted mode) over the generic
+     * role-based default.
+     */
+    private function postLoginUrl(array $user): string
+    {
+        if (!empty($_SESSION['login_redirect'])) {
+            $target = $_SESSION['login_redirect'];
+            unset($_SESSION['login_redirect']);
+            return $target;
+        }
+        return base_url($user['role'] === 'superadmin' ? 'admin/dashboard' : 'my/lists');
     }
 
     private function getSiteSettings(): array
@@ -104,10 +144,10 @@ class AdminController
     }
 
     /** Returns true and removes the used code from the DB if valid. */
-    private function verifyRecoveryCode(array $admin, string $input): bool
+    private function verifyRecoveryCode(array $user, string $input): bool
     {
         global $db;
-        $codes = json_decode($admin['recovery_codes'] ?? '[]', true);
+        $codes = json_decode($user['recovery_codes'] ?? '[]', true);
         if (!is_array($codes) || empty($codes)) {
             return false;
         }
@@ -115,9 +155,9 @@ class AdminController
         foreach ($codes as $idx => $hash) {
             if (password_verify($input, $hash)) {
                 unset($codes[$idx]);
-                $db->update('admin',
+                $db->update('users',
                     ['recovery_codes' => json_encode(array_values($codes))],
-                    ['id' => $admin['id']]
+                    ['id' => $user['id']]
                 );
                 return true;
             }
@@ -138,8 +178,8 @@ class AdminController
     /** GET /admin/login */
     public function loginForm(array $params = []): void
     {
-        if (!empty($_SESSION['admin_logged_in'])) {
-            redirect(base_url('admin/dashboard'));
+        if (!empty($_SESSION['user_logged_in'])) {
+            redirect(base_url(($_SESSION['user_role'] ?? '') === 'superadmin' ? 'admin/dashboard' : 'my/lists'));
         }
         render('admin/login', ['pageTitle' => __('admin.login_title')]);
     }
@@ -166,9 +206,12 @@ class AdminController
         $password = $_POST['password'] ?? '';
 
         global $db;
-        $admin = $db->fetch('SELECT * FROM admin WHERE email = ?', [$email]);
+        $user = $db->fetch('SELECT * FROM users WHERE email = ?', [$email]);
 
-        if (!$admin || !password_verify($password, $admin['password_hash'])) {
+        // Disabled accounts are treated like a wrong password (generic error)
+        // so a login attempt can't be used to probe whether an account exists
+        // or is merely disabled.
+        if (!$user || $user['status'] !== 'active' || !password_verify($password, (string) $user['password_hash'])) {
             rate_limit_record('admin_login');
             flash('error', __('admin.login_error'));
             render('admin/login', ['pageTitle' => __('admin.login_title')]);
@@ -177,54 +220,44 @@ class AdminController
 
         $hasPasskeys = false;
         try {
-            $pkStmt = $db->getPdo()->prepare('SELECT COUNT(*) FROM admin_passkeys WHERE admin_id = ?');
-            $pkStmt->execute([(int) $admin['id']]);
+            $pkStmt = $db->getPdo()->prepare('SELECT COUNT(*) FROM user_passkeys WHERE user_id = ?');
+            $pkStmt->execute([(int) $user['id']]);
             $hasPasskeys = (int) $pkStmt->fetchColumn() > 0;
         } catch (Throwable) {}
 
-        if ($admin['totp_enabled'] || $hasPasskeys) {
-            $_SESSION['admin_totp_pending'] = true;
-            $_SESSION['admin_id_pending']   = $admin['id'];
+        if ($user['totp_enabled'] || $hasPasskeys) {
+            $_SESSION['user_totp_pending'] = true;
+            $_SESSION['user_id_pending']   = $user['id'];
             session_regenerate_id(true);
             redirect(base_url('admin/totp'));
         }
 
-        $_SESSION['admin_logged_in'] = true;
-        $_SESSION['admin_id']        = $admin['id'];
-        session_regenerate_id(true);
-
-        // Remove installer on first login (belt-and-suspenders in case unlink inside install.php failed)
-        foreach ([BASE_DIR . '/install.php', BASE_DIR . '/install.php.done'] as $f) {
-            if (file_exists($f)) {
-                @unlink($f);
-            }
-        }
-
-        redirect(base_url('admin/dashboard'));
+        $this->establishSession($user);
+        redirect($this->postLoginUrl($user));
     }
 
     /** GET /admin/totp */
     public function totpForm(array $params = []): void
     {
-        if (empty($_SESSION['admin_totp_pending'])) {
+        if (empty($_SESSION['user_totp_pending'])) {
             redirect(base_url('admin/login'));
         }
 
-        $adminId     = (int) ($_SESSION['admin_id_pending'] ?? 0);
+        $userId      = (int) ($_SESSION['user_id_pending'] ?? 0);
         $hasTOTP     = false;
         $hasPasskeys = false;
         $hasRecovery = false;
 
         global $db;
-        if ($adminId) {
-            $adminRow = $db->fetch('SELECT totp_enabled, recovery_codes FROM admin WHERE id = ? LIMIT 1', [$adminId]);
-            if ($adminRow) {
-                $hasTOTP     = !empty($adminRow['totp_enabled']);
-                $hasRecovery = !empty($adminRow['recovery_codes']);
+        if ($userId) {
+            $userRow = $db->fetch('SELECT totp_enabled, recovery_codes FROM users WHERE id = ? LIMIT 1', [$userId]);
+            if ($userRow) {
+                $hasTOTP     = !empty($userRow['totp_enabled']);
+                $hasRecovery = !empty($userRow['recovery_codes']);
             }
             try {
-                $pkStmt = $db->getPdo()->prepare('SELECT COUNT(*) FROM admin_passkeys WHERE admin_id = ?');
-                $pkStmt->execute([$adminId]);
+                $pkStmt = $db->getPdo()->prepare('SELECT COUNT(*) FROM user_passkeys WHERE user_id = ?');
+                $pkStmt->execute([$userId]);
                 $hasPasskeys = (int) $pkStmt->fetchColumn() > 0;
             } catch (Throwable) {}
         }
@@ -240,26 +273,26 @@ class AdminController
     /** POST /admin/totp */
     public function totpVerify(array $params = []): void
     {
-        if (empty($_SESSION['admin_totp_pending'])) {
+        if (empty($_SESSION['user_totp_pending'])) {
             redirect(base_url('admin/login'));
         }
         if (!csrf_verify()) {
             abort(403);
         }
 
-        $code  = trim($_POST['totp_code'] ?? '');
+        $code = trim($_POST['totp_code'] ?? '');
         global $db;
-        $admin = $db->fetch('SELECT * FROM admin WHERE id = ?',
-            [$_SESSION['admin_id_pending'] ?? 0]);
+        $user = $db->fetch('SELECT * FROM users WHERE id = ?',
+            [$_SESSION['user_id_pending'] ?? 0]);
 
-        if (!$admin) {
+        if (!$user) {
             session_destroy();
             redirect(base_url('admin/login'));
         }
 
         $_SESSION['totp_attempts'] = ($_SESSION['totp_attempts'] ?? 0) + 1;
 
-        $totpValid = Totp::verify($admin['totp_secret'], $code);
+        $totpValid = Totp::verify($user['totp_secret'], $code);
 
         // TOTP replay protection: reject codes from already-used time steps
         if ($totpValid) {
@@ -272,7 +305,7 @@ class AdminController
             }
         }
 
-        $valid = $totpValid || $this->verifyRecoveryCode($admin, $code);
+        $valid = $totpValid || $this->verifyRecoveryCode($user, $code);
 
         if (!$valid) {
             if ($_SESSION['totp_attempts'] >= 3) {
@@ -284,15 +317,8 @@ class AdminController
             return;
         }
 
-        $_SESSION['admin_logged_in'] = true;
-        $_SESSION['admin_id']        = $admin['id'];
-        unset(
-            $_SESSION['admin_totp_pending'],
-            $_SESSION['admin_id_pending'],
-            $_SESSION['totp_attempts']
-        );
-        session_regenerate_id(true);
-        redirect(base_url('admin/dashboard'));
+        $this->establishSession($user);
+        redirect($this->postLoginUrl($user));
     }
 
     /** POST /admin/logout */
@@ -323,7 +349,7 @@ class AdminController
         // having 5 claimed should move the bar, not wait until all 20 are
         // gone (see GuestController::view for the same calculation).
         $events = $db->fetchAll(
-            'SELECT e.*,
+            'SELECT e.*, u.email AS owner_email,
                 (SELECT COALESCE(SUM(quantity), 0) FROM items
                  WHERE event_id = e.id AND status = "approved") AS item_count,
                 (SELECT COALESCE(SUM(
@@ -334,6 +360,7 @@ class AdminController
                  WHERE i2.event_id = e.id AND i2.status = "approved"
                 ) AS claimed_count
              FROM events e
+             LEFT JOIN users u ON u.id = e.user_id
              ORDER BY e.created_at DESC'
         );
 
@@ -391,6 +418,174 @@ class AdminController
         $deleted = $this->performCleanup();
         flash('success', $deleted['events'] . ' abgelaufene Event(s) und ' . $deleted['rate_limit'] . ' Rate-Limit-Eintrag/Einträge gelöscht.');
         redirect(base_url('admin/dashboard'));
+    }
+
+    // ==================================================================
+    // User management (invite-only registered users; the SuperAdmin row
+    // itself is never listed/editable here)
+    // ==================================================================
+
+    /** GET /admin/users */
+    public function users(array $params = []): void
+    {
+        $this->checkAuth();
+        global $db;
+        $users = $db->fetchAll(
+            "SELECT u.*,
+                (SELECT expires_at FROM user_invites WHERE user_id = u.id ORDER BY id DESC LIMIT 1) AS latest_invite_expires
+             FROM users u
+             WHERE u.role = 'user'
+             ORDER BY u.created_at DESC"
+        );
+
+        render('admin/users', [
+            'pageTitle'        => __('admin.settings_users'),
+            'currentAdminPage' => 'users',
+            'containerClass'   => 'container--wide',
+            'users'            => $users,
+        ]);
+    }
+
+    /**
+     * Generates a fresh invite token for a user and emails it, replacing any
+     * previous unused invite (so an old, still-valid link can't linger
+     * alongside a newly issued one). Shared by inviteUser() and resendInvite().
+     */
+    private function sendInvite(int $userId, string $email): bool
+    {
+        global $db;
+        $db->delete('user_invites', ['user_id' => $userId]);
+
+        $token = bin2hex(random_bytes(32));
+        $db->insert('user_invites', [
+            'user_id'    => $userId,
+            'token'      => $token,
+            'expires_at' => date('Y-m-d H:i:s', time() + 86400),
+        ]);
+
+        $emailSettings = $db->fetch('SELECT * FROM email_settings LIMIT 1') ?: [];
+        $mailer        = new Mailer($emailSettings);
+        $html          = Mailer::renderTemplate('user_invite', [
+            'inviteUrl' => base_url('invite/' . $token),
+        ]);
+        return $mailer->send($email, 'Einladung zu ' . site_title(), $html);
+    }
+
+    /** POST /admin/users/invite */
+    public function inviteUser(array $params = []): void
+    {
+        $this->checkAuth();
+        if (!csrf_verify()) {
+            abort(403);
+        }
+
+        $email = trim($_POST['email'] ?? '');
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            flash('error', 'Bitte eine gültige E-Mail-Adresse angeben.');
+            redirect(base_url('admin/users'));
+        }
+
+        global $db;
+        if ($db->fetch('SELECT id FROM users WHERE email = ?', [$email])) {
+            flash('error', 'Es existiert bereits ein Account mit dieser E-Mail-Adresse.');
+            redirect(base_url('admin/users'));
+        }
+
+        $userId = $db->insert('users', [
+            'email'  => $email,
+            'role'   => 'user',
+            'status' => 'active',
+        ]);
+
+        if ($this->sendInvite($userId, $email)) {
+            flash('success', 'Einladung an ' . h($email) . ' wurde versendet.');
+        } else {
+            flash('error', 'Benutzer wurde angelegt, aber die Einladungs-E-Mail konnte nicht versendet werden. Bitte E-Mail-Einstellungen prüfen und die Einladung erneut senden.');
+        }
+        redirect(base_url('admin/users'));
+    }
+
+    /** POST /admin/users/{id}/resend */
+    public function resendInvite(array $params = []): void
+    {
+        $this->checkAuth();
+        if (!csrf_verify()) {
+            abort(403);
+        }
+
+        global $db;
+        $id   = (int) ($params['id'] ?? 0);
+        $user = $db->fetch("SELECT * FROM users WHERE id = ? AND role = 'user'", [$id]);
+        if (!$user) {
+            flash('error', 'Benutzer nicht gefunden.');
+            redirect(base_url('admin/users'));
+        }
+        if ($user['password_hash'] !== null) {
+            flash('error', 'Dieser Account wurde bereits aktiviert.');
+            redirect(base_url('admin/users'));
+        }
+
+        if ($this->sendInvite((int) $user['id'], $user['email'])) {
+            flash('success', 'Einladung wurde erneut versendet.');
+        } else {
+            flash('error', 'Einladungs-E-Mail konnte nicht versendet werden. Bitte E-Mail-Einstellungen prüfen.');
+        }
+        redirect(base_url('admin/users'));
+    }
+
+    /**
+     * POST /admin/users/{id}/toggle
+     * Locks/unlocks login for a user without deleting their account or
+     * lists. Note: an already-open session isn't killed immediately — it
+     * expires via the existing 30-minute inactivity timeout, same as
+     * everywhere else in this controller.
+     */
+    public function toggleUserStatus(array $params = []): void
+    {
+        $this->checkAuth();
+        if (!csrf_verify()) {
+            abort(403);
+        }
+
+        global $db;
+        $id   = (int) ($params['id'] ?? 0);
+        $user = $db->fetch("SELECT * FROM users WHERE id = ? AND role = 'user'", [$id]);
+        if (!$user) {
+            flash('error', 'Benutzer nicht gefunden.');
+            redirect(base_url('admin/users'));
+        }
+
+        $newStatus = $user['status'] === 'active' ? 'disabled' : 'active';
+        $db->update('users', ['status' => $newStatus], ['id' => $id]);
+
+        flash('success', $newStatus === 'active' ? 'Account wurde entsperrt.' : 'Account wurde gesperrt.');
+        redirect(base_url('admin/users'));
+    }
+
+    /**
+     * POST /admin/users/{id}/delete
+     * events.user_id has ON DELETE SET NULL (see migration 002) — their
+     * lists fall back to token-only access instead of being deleted.
+     */
+    public function deleteUser(array $params = []): void
+    {
+        $this->checkAuth();
+        if (!csrf_verify()) {
+            abort(403);
+        }
+
+        global $db;
+        $id   = (int) ($params['id'] ?? 0);
+        $user = $db->fetch("SELECT * FROM users WHERE id = ? AND role = 'user'", [$id]);
+        if (!$user) {
+            flash('error', 'Benutzer nicht gefunden.');
+            redirect(base_url('admin/users'));
+        }
+
+        $db->delete('users', ['id' => $id]);
+
+        flash('success', 'Account "' . h($user['email']) . '" wurde gelöscht.');
+        redirect(base_url('admin/users'));
     }
 
     // ==================================================================
@@ -545,89 +740,6 @@ class AdminController
     }
 
     // ==================================================================
-    // 2FA / TOTP
-    // ==================================================================
-
-    /** POST /admin/settings/2fa */
-    public function totpEnable(array $params = []): void
-    {
-        $this->checkAuth();
-        if (!csrf_verify()) {
-            abort(403);
-        }
-
-        $secret = $_SESSION['totp_setup_secret'] ?? '';
-        if ($secret === '') {
-            flash('error', 'Session abgelaufen. Bitte Einrichtung erneut starten.');
-            redirect(base_url('admin/settings/security'));
-        }
-
-        $code = trim($_POST['totp_code'] ?? '');
-        if (!Totp::verify($secret, $code)) {
-            flash('error', __('admin.totp_error'));
-            redirect(base_url('admin/settings/security'));
-        }
-
-        // Generate 8 recovery codes (8 uppercase hex chars each)
-        $plaintextCodes = [];
-        for ($i = 0; $i < 8; $i++) {
-            $plaintextCodes[] = strtoupper(bin2hex(random_bytes(4)));
-        }
-        $hashedCodes = array_map(
-            fn($c) => password_hash($c, PASSWORD_BCRYPT),
-            $plaintextCodes
-        );
-
-        $admin = $this->getAdminRow();
-        global $db;
-        $db->update('admin', [
-            'totp_secret'    => $secret,
-            'totp_enabled'   => 1,
-            'recovery_codes' => json_encode($hashedCodes),
-        ], ['id' => $admin['id']]);
-
-        unset($_SESSION['totp_setup_secret']);
-        $_SESSION['recovery_codes_display'] = $plaintextCodes;
-
-        flash('success', '2FA wurde erfolgreich aktiviert. Bewahre deine Recovery-Codes sicher auf!');
-        redirect(base_url('admin/settings/security'));
-    }
-
-    /** POST /admin/settings/2fa/disable */
-    public function totpDisable(array $params = []): void
-    {
-        $this->checkAuth();
-        if (!csrf_verify()) {
-            abort(403);
-        }
-
-        $password = $_POST['password'] ?? '';
-        $admin    = $this->getAdminRow();
-
-        if (!password_verify($password, $admin['password_hash'])) {
-            flash('error', 'Falsches Passwort. 2FA wurde nicht deaktiviert.');
-            redirect(base_url('admin/settings/security'));
-        }
-
-        global $db;
-        $hasPasskeys = false;
-        try {
-            $pkStmt = $db->getPdo()->prepare('SELECT COUNT(*) FROM admin_passkeys WHERE admin_id = ?');
-            $pkStmt->execute([(int) $admin['id']]);
-            $hasPasskeys = (int) $pkStmt->fetchColumn() > 0;
-        } catch (Throwable) {}
-
-        $db->update('admin', [
-            'totp_secret'    => null,
-            'totp_enabled'   => 0,
-            'recovery_codes' => $hasPasskeys ? $admin['recovery_codes'] : null,
-        ], ['id' => $admin['id']]);
-
-        flash('success', '2FA wurde deaktiviert.');
-        redirect(base_url('admin/settings/security'));
-    }
-
-    // ==================================================================
     // Email settings
     // ==================================================================
 
@@ -699,10 +811,10 @@ class AdminController
         }
         global $db;
         $settings = $db->fetch('SELECT * FROM email_settings LIMIT 1') ?: [];
-        $admin    = $this->getAdminRow();
+        $user     = $this->getCurrentUser();
         $to       = !empty(trim($_POST['test_email'] ?? ''))
                   ? trim($_POST['test_email'])
-                  : ($admin['email'] ?? '');
+                  : ($user['email'] ?? '');
 
         if ($to === '' || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
             flash('error', 'Keine gültige Empfänger-E-Mail angegeben.');
@@ -764,70 +876,27 @@ class AdminController
     }
 
     // ==================================================================
-    // Security: rate limits, claim delay, and 2FA (TOTP / Passkeys)
+    // Security: site-wide settings (rate limits, claim delay, list
+    // creation mode). Personal 2FA (TOTP/Passkeys) lives in
+    // AccountSecurityController — available to any logged-in account, not
+    // just the SuperAdmin, see /account/security.
     // ==================================================================
 
     /** GET /admin/settings/security */
     public function securitySettings(array $params = []): void
     {
         $this->checkAuth();
-        global $db;
-        $s          = $this->getSiteSettings();
-        $cronToken  = $s['cron_cleanup_token'] ?? '';
-        $admin      = $this->getAdminRow();
-
-        $qrSvg         = null;
-        $pendingSecret = null;
-
-        // Show recovery codes exactly once after enabling TOTP or regenerating codes
-        $recoveryCodes = $_SESSION['recovery_codes_display'] ?? null;
-        unset($_SESSION['recovery_codes_display']);
-
-        // Pending passkey confirmation: passkey validated but not yet saved to DB
-        $pendingPasskeyConfirm = false;
-        if (!empty($_SESSION['passkey_pending'])) {
-            $pendingPasskeyConfirm = true;
-            $recoveryCodes = $_SESSION['passkey_pending_codes'] ?? [];
-        }
-
-        if (!$admin['totp_enabled']) {
-            if (empty($_SESSION['totp_setup_secret'])) {
-                $_SESSION['totp_setup_secret'] = Totp::generateSecret();
-            }
-            $pendingSecret = $_SESSION['totp_setup_secret'];
-            $uri           = Totp::getQrCodeUri($pendingSecret, $admin['email'], site_title());
-            try {
-                $qrSvg = Totp::renderQrCodeSvg($uri);
-            } catch (Throwable) {
-                $qrSvg = null;
-            }
-        }
-
-        $passkeys = [];
-        try {
-            $passkeys = $db->fetchAll(
-                'SELECT * FROM admin_passkeys WHERE admin_id = ? ORDER BY created_at DESC',
-                [(int) $admin['id']]
-            );
-        } catch (Throwable) {}
-
-        $storedHashes  = json_decode($admin['recovery_codes'] ?? '[]', true);
-        $recoveryCount = is_array($storedHashes) ? count($storedHashes) : 0;
+        $s         = $this->getSiteSettings();
+        $cronToken = $s['cron_cleanup_token'] ?? '';
 
         render('admin/security_settings', [
-            'pageTitle'             => __('admin.settings_security'),
-            'currentAdminPage'      => 'security',
-            'containerClass'        => 'container--wide',
-            's'                     => $s,
-            'cronToken'             => $cronToken,
-            'cronUrl'               => $cronToken !== '' ? base_url('cron/cleanup?token=' . $cronToken) : '',
-            'admin'                 => $admin,
-            'qrSvg'                 => $qrSvg,
-            'pendingSecret'         => $pendingSecret,
-            'recoveryCodes'         => $recoveryCodes,
-            'passkeys'              => $passkeys,
-            'recoveryCount'         => $recoveryCount,
-            'pendingPasskeyConfirm' => $pendingPasskeyConfirm,
+            'pageTitle'        => __('admin.settings_security'),
+            'currentAdminPage' => 'security',
+            'containerClass'   => 'container--wide',
+            's'                => $s,
+            'listCreationMode' => list_creation_mode(),
+            'cronToken'        => $cronToken,
+            'cronUrl'          => $cronToken !== '' ? base_url('cron/cleanup?token=' . $cronToken) : '',
         ]);
     }
 
@@ -853,6 +922,13 @@ class AdminController
         if ($action === 'claim_delay') {
             $this->saveSiteSetting('claim_finalize_delay_minutes', (string) max(1, min(1440, (int) ($_POST['claim_finalize_delay_minutes'] ?? 10))));
             flash('success', __('admin.claim_delay_saved'));
+            redirect(base_url('admin/settings/security'));
+        }
+
+        if ($action === 'list_creation_mode') {
+            $mode = ($_POST['list_creation_mode'] ?? '') === 'restricted' ? 'restricted' : 'open';
+            $this->saveSiteSetting('list_creation_mode', $mode);
+            flash('success', 'Einstellung gespeichert.');
             redirect(base_url('admin/settings/security'));
         }
 
@@ -909,129 +985,22 @@ class AdminController
     }
 
     // ==================================================================
-    // Passkeys (WebAuthn)
+    // Passkeys (WebAuthn) — login-time verification only. Registering,
+    // confirming, listing and deleting passkeys lives in
+    // AccountSecurityController (any logged-in account manages those for
+    // themselves at /account/security), since that's no longer SuperAdmin-only.
     // ==================================================================
-
-    /**
-     * POST /admin/settings/2fa/passkey  (JSON)
-     * Handles register_challenge and register_complete for passkey registration.
-     * Requires admin to be logged in.
-     */
-    public function passkeyApi(array $params = []): void
-    {
-        $this->checkAuth();
-        header('Content-Type: application/json');
-
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            http_response_code(405);
-            echo json_encode(['error' => 'method not allowed']);
-            return;
-        }
-
-        $input  = json_decode(file_get_contents('php://input'), true) ?? [];
-        $action = $input['action'] ?? '';
-
-        if (!hash_equals($_SESSION['csrf_token'] ?? '', $input['_csrf'] ?? '')) {
-            http_response_code(403);
-            echo json_encode(['error' => 'csrf']);
-            return;
-        }
-
-        global $db;
-        $admin    = $this->getAdminRow();
-        $adminId  = (int) $admin['id'];
-        $siteName = site_title();
-        $rpId     = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
-
-        if ($action === 'register_challenge') {
-            try {
-                // Discard any previously unconfirmed pending passkey so it cannot
-                // accumulate as an orphan credential in the authenticator.
-                unset($_SESSION['passkey_pending'], $_SESSION['passkey_pending_codes']);
-
-                $wa = new WebAuthn($siteName, $rpId, null, true);
-
-                $excludeIds = [];
-                try {
-                    $stmt = $db->getPdo()->prepare('SELECT credential_id FROM admin_passkeys WHERE admin_id = ?');
-                    $stmt->execute([$adminId]);
-                    $excludeIds = array_map('base64_decode', $stmt->fetchAll(PDO::FETCH_COLUMN));
-                } catch (Throwable) {}
-
-                // Use a stable, deterministic user ID so that re-registration of the
-                // same authenticator replaces the old credential instead of adding a
-                // new orphan entry in the authenticator (e.g. Vaultwarden).
-                $stableUserId = pack('N', $adminId) . "\0\0\0\0";  // 8-byte big-endian admin ID
-
-                $args = $wa->getCreateArgs(
-                    $stableUserId,
-                    $admin['email'],
-                    $admin['email'],
-                    60,
-                    true,
-                    'preferred',
-                    null,
-                    $excludeIds
-                );
-                $_SESSION['webauthn_register_challenge'] = $wa->getChallenge();
-                echo json_encode($args);
-            } catch (Throwable $e) {
-                http_response_code(500);
-                echo json_encode(['error' => $e->getMessage()]);
-            }
-            return;
-        }
-
-        if ($action === 'register_complete') {
-            try {
-                $name = mb_substr(trim($input['deviceName'] ?? ''), 0, 100);
-                if ($name === '') $name = 'Passkey';
-
-                $clientDataJSON = self::b64urlDecode($input['clientDataJSON']    ?? '');
-                $attestation    = self::b64urlDecode($input['attestationObject'] ?? '');
-                $challenge      = $_SESSION['webauthn_register_challenge'] ?? null;
-
-                if (!$challenge) {
-                    throw new RuntimeException('Keine Challenge in der Session.');
-                }
-
-                $wa   = new WebAuthn($siteName, $rpId, null, true);
-                $data = $wa->processCreate($clientDataJSON, $attestation, $challenge, false, false);
-
-                unset($_SESSION['webauthn_register_challenge']);
-
-                // Passkey is NOT saved to DB yet – only after the user confirms
-                // they have safely stored the recovery codes (pending-confirmation flow).
-                $_SESSION['passkey_pending'] = [
-                    'credential_id' => base64_encode($data->credentialId),
-                    'public_key'    => $data->credentialPublicKey,
-                    'sign_counter'  => (int) $data->signatureCounter,
-                    'device_name'   => $name,
-                ];
-                $_SESSION['passkey_pending_codes'] = $this->generateRecoveryCodes();
-
-                echo json_encode(['ok' => true, 'redirect' => base_url('admin/settings/security')]);
-            } catch (Throwable $e) {
-                http_response_code(400);
-                echo json_encode(['error' => $e->getMessage()]);
-            }
-            return;
-        }
-
-        http_response_code(400);
-        echo json_encode(['error' => 'unknown action']);
-    }
 
     /**
      * POST /admin/settings/2fa/passkey-auth  (JSON)
      * Handles auth_challenge and auth_complete during the login 2FA step.
-     * Requires admin_totp_pending session (not full admin session).
+     * Requires user_totp_pending session (not a full login session).
      */
     public function passkeyAuthApi(array $params = []): void
     {
         header('Content-Type: application/json');
 
-        if (empty($_SESSION['admin_totp_pending'])) {
+        if (empty($_SESSION['user_totp_pending'])) {
             http_response_code(401);
             echo json_encode(['error' => 'no pending session']);
             return;
@@ -1053,14 +1022,14 @@ class AdminController
         }
 
         global $db;
-        $adminId  = (int) ($_SESSION['admin_id_pending'] ?? 0);
+        $userId   = (int) ($_SESSION['user_id_pending'] ?? 0);
         $siteName = site_title();
         $rpId     = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
 
         if ($action === 'auth_challenge') {
             try {
-                $stmt = $db->getPdo()->prepare('SELECT COUNT(*) FROM admin_passkeys WHERE admin_id = ?');
-                $stmt->execute([$adminId]);
+                $stmt = $db->getPdo()->prepare('SELECT COUNT(*) FROM user_passkeys WHERE user_id = ?');
+                $stmt->execute([$userId]);
                 if ((int) $stmt->fetchColumn() === 0) {
                     http_response_code(400);
                     echo json_encode(['error' => 'Keine Passkeys registriert.']);
@@ -1084,9 +1053,9 @@ class AdminController
                 $credIdB64 = base64_encode($credIdBin);
 
                 $stmt = $db->getPdo()->prepare(
-                    'SELECT * FROM admin_passkeys WHERE admin_id = ? AND credential_id = ? LIMIT 1'
+                    'SELECT * FROM user_passkeys WHERE user_id = ? AND credential_id = ? LIMIT 1'
                 );
-                $stmt->execute([$adminId, $credIdB64]);
+                $stmt->execute([$userId, $credIdB64]);
                 $passkey = $stmt->fetch() ?: null;
 
                 if (!$passkey) {
@@ -1118,20 +1087,20 @@ class AdminController
                 );
                 $newCounter = $wa->getSignatureCounter() ?? (int) $passkey['sign_counter'];
 
-                $db->getPdo()->prepare('UPDATE admin_passkeys SET sign_counter = ? WHERE id = ?')
+                $db->getPdo()->prepare('UPDATE user_passkeys SET sign_counter = ? WHERE id = ?')
                    ->execute([$newCounter, $passkey['id']]);
 
-                unset(
-                    $_SESSION['admin_totp_pending'],
-                    $_SESSION['admin_id_pending'],
-                    $_SESSION['totp_attempts'],
-                    $_SESSION['webauthn_auth_challenge']
-                );
-                $_SESSION['admin_logged_in'] = true;
-                $_SESSION['admin_id']        = $adminId;
-                session_regenerate_id(true);
+                unset($_SESSION['webauthn_auth_challenge']);
 
-                echo json_encode(['ok' => true, 'redirect' => base_url('admin/dashboard')]);
+                $user = $db->fetch('SELECT * FROM users WHERE id = ?', [$userId]);
+                if (!$user) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Account nicht gefunden.']);
+                    return;
+                }
+                $this->establishSession($user);
+
+                echo json_encode(['ok' => true, 'redirect' => $this->postLoginUrl($user)]);
             } catch (Throwable $e) {
                 http_response_code(400);
                 echo json_encode(['error' => $e->getMessage()]);
@@ -1141,136 +1110,6 @@ class AdminController
 
         http_response_code(400);
         echo json_encode(['error' => 'unknown action']);
-    }
-
-    /**
-     * POST /admin/settings/2fa/passkey/confirm
-     * Saves a pending passkey to the DB after the user confirms recovery codes are stored.
-     */
-    public function confirmPasskey(array $params = []): void
-    {
-        $this->checkAuth();
-        if (!csrf_verify()) {
-            abort(403);
-        }
-
-        $pending = $_SESSION['passkey_pending'] ?? null;
-        $codes   = $_SESSION['passkey_pending_codes'] ?? [];
-
-        if (!$pending || empty($pending['credential_id'])) {
-            flash('error', 'Keine ausstehende Passkey-Registrierung gefunden.');
-            redirect(base_url('admin/settings/security'));
-        }
-
-        global $db;
-        $admin   = $this->getAdminRow();
-        $adminId = (int) $admin['id'];
-
-        try {
-            $db->insert('admin_passkeys', [
-                'admin_id'      => $adminId,
-                'credential_id' => $pending['credential_id'],
-                'public_key'    => $pending['public_key'],
-                'sign_counter'  => $pending['sign_counter'],
-                'device_name'   => $pending['device_name'],
-            ]);
-            $hashedCodes = array_map(fn($c) => password_hash($c, PASSWORD_BCRYPT), $codes);
-            $db->update('admin', ['recovery_codes' => json_encode($hashedCodes)], ['id' => $adminId]);
-        } catch (Throwable $e) {
-            flash('error', 'Fehler beim Speichern des Passkeys: ' . $e->getMessage());
-            redirect(base_url('admin/settings/security'));
-        }
-
-        unset($_SESSION['passkey_pending'], $_SESSION['passkey_pending_codes']);
-
-        flash('success', 'Passkey "' . h($pending['device_name']) . '" wurde gespeichert.');
-        redirect(base_url('admin/settings/security'));
-    }
-
-    /**
-     * POST /admin/settings/2fa/passkey/cancel
-     * Cancels a pending passkey registration without saving anything.
-     */
-    public function cancelPendingPasskey(array $params = []): void
-    {
-        $this->checkAuth();
-        if (!csrf_verify()) {
-            abort(403);
-        }
-
-        unset($_SESSION['passkey_pending'], $_SESSION['passkey_pending_codes']);
-
-        flash('info', 'Passkey-Registrierung abgebrochen.');
-        redirect(base_url('admin/settings/security'));
-    }
-
-    /**
-     * POST /admin/settings/2fa/passkey/delete
-     * Deletes a registered passkey by ID.
-     * Clears recovery codes if no 2FA method remains.
-     */
-    public function deletePasskey(array $params = []): void
-    {
-        $this->checkAuth();
-        if (!csrf_verify()) {
-            abort(403);
-        }
-
-        global $db;
-        $admin   = $this->getAdminRow();
-        $pkId    = (int) ($_POST['passkey_id'] ?? 0);
-
-        try {
-            $db->getPdo()->prepare('DELETE FROM admin_passkeys WHERE id = ? AND admin_id = ?')
-               ->execute([$pkId, (int) $admin['id']]);
-
-            $stmt = $db->getPdo()->prepare('SELECT COUNT(*) FROM admin_passkeys WHERE admin_id = ?');
-            $stmt->execute([(int) $admin['id']]);
-            $remaining = (int) $stmt->fetchColumn();
-
-            if ($remaining === 0 && empty($admin['totp_enabled'])) {
-                $db->update('admin', ['recovery_codes' => null], ['id' => $admin['id']]);
-            }
-        } catch (Throwable) {}
-
-        flash('success', __('admin.passkey_deleted'));
-        redirect(base_url('admin/settings/security'));
-    }
-
-    /**
-     * POST /admin/settings/2fa/recovery
-     * Regenerates recovery codes (requires at least one active 2FA method).
-     */
-    public function regenerateRecoveryCodes(array $params = []): void
-    {
-        $this->checkAuth();
-        if (!csrf_verify()) {
-            abort(403);
-        }
-
-        global $db;
-        $admin = $this->getAdminRow();
-
-        $hasTOTP     = !empty($admin['totp_enabled']);
-        $hasPasskeys = false;
-        try {
-            $stmt = $db->getPdo()->prepare('SELECT COUNT(*) FROM admin_passkeys WHERE admin_id = ?');
-            $stmt->execute([(int) $admin['id']]);
-            $hasPasskeys = (int) $stmt->fetchColumn() > 0;
-        } catch (Throwable) {}
-
-        if (!$hasTOTP && !$hasPasskeys) {
-            flash('error', 'Keine 2FA-Methode aktiv. Aktiviere zuerst TOTP oder einen Passkey.');
-            redirect(base_url('admin/settings/security'));
-        }
-
-        $plaintextCodes = $this->generateRecoveryCodes();
-        $hashedCodes    = array_map(fn($c) => password_hash($c, PASSWORD_BCRYPT), $plaintextCodes);
-        $db->update('admin', ['recovery_codes' => json_encode($hashedCodes)], ['id' => $admin['id']]);
-
-        $_SESSION['recovery_codes_display'] = $plaintextCodes;
-        flash('success', __('admin.recovery_regenerated'));
-        redirect(base_url('admin/settings/security'));
     }
 
     /**

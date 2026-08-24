@@ -11,6 +11,7 @@ class ItemController
         global $db;
 
         $event = $this->loadEvent($params['admin_token'] ?? '');
+        require_event_owner_access($event);
         if (!csrf_verify()) {
             abort(403);
         }
@@ -57,6 +58,7 @@ class ItemController
         global $db;
 
         $event = $this->loadEvent($params['admin_token'] ?? '');
+        require_event_owner_access($event);
         $item  = $this->loadItem((int) ($params['id'] ?? 0), $event['id']);
 
         if (!csrf_verify()) {
@@ -106,6 +108,7 @@ class ItemController
         global $db;
 
         $event = $this->loadEvent($params['admin_token'] ?? '');
+        require_event_owner_access($event);
         $item  = $this->loadItem((int) ($params['id'] ?? 0), $event['id']);
 
         if (!csrf_verify()) {
@@ -126,6 +129,7 @@ class ItemController
         global $db;
 
         $event = $this->loadEvent($params['admin_token'] ?? '');
+        require_event_owner_access($event);
         $item  = $this->loadItem((int) ($params['id'] ?? 0), $event['id']);
 
         if (!csrf_verify()) {
@@ -146,6 +150,7 @@ class ItemController
         global $db;
 
         $event = $this->loadEvent($params['admin_token'] ?? '');
+        require_event_owner_access($event);
         $item  = $this->loadItem((int) ($params['id'] ?? 0), $event['id']);
 
         if (!csrf_verify()) {
@@ -169,6 +174,10 @@ class ItemController
         global $db;
 
         $event = $this->loadEvent($params['admin_token'] ?? '');
+        if (!has_event_owner_access($event)) {
+            http_response_code(403);
+            return;
+        }
 
         $body = json_decode((string) file_get_contents('php://input'), true);
         $body = is_array($body) ? $body : [];

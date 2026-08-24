@@ -9,6 +9,9 @@ if (!defined('CONFIG_PATH')) {
     define('CONFIG_PATH', BASE_DIR . '/config/config.php');
 }
 
+// Bump on every release (see UPGRADE.md); shown in the public footer.
+define('APP_VERSION', '1.1.0');
+
 // Gift Mode (Geschenkmodus) tuning constants
 define('GIFT_MODE_HEARTBEAT_INTERVAL_MS', 30000);  // JS heartbeat interval
 define('GIFT_MODE_HEARTBEAT_TIMEOUT', 120);         // seconds until a guest counts as "gone"
@@ -246,6 +249,69 @@ function site_title(): string
         }
     }
     return $cached;
+}
+
+/** The logged-in user's id, or null if nobody is logged in (any role). */
+function current_user_id(): ?int
+{
+    return !empty($_SESSION['user_logged_in']) ? (int) ($_SESSION['user_id'] ?? 0) : null;
+}
+
+/**
+ * Whether creating a new list requires being logged in ('restricted') or is
+ * open to anyone ('open', the default — preserves pre-multi-user behaviour
+ * for existing installs). Configurable in admin security settings.
+ */
+function list_creation_mode(): string
+{
+    global $db;
+    static $cached = null;
+    if ($cached !== null) {
+        return $cached;
+    }
+
+    $cached = 'open';
+    if ($db !== null) {
+        try {
+            $row = $db->fetch(
+                "SELECT setting_value FROM site_settings WHERE setting_key = 'list_creation_mode' LIMIT 1"
+            );
+            if (($row['setting_value'] ?? '') === 'restricted') {
+                $cached = 'restricted';
+            }
+        } catch (PDOException) {
+            // keep default
+        }
+    }
+    return $cached;
+}
+
+/**
+ * True if the current session may manage the given event: either the event
+ * has no owner (a legacy, pre-multi-user list — the admin_token link alone
+ * remains sufficient, unchanged from before), or the session is logged in
+ * as that owner, or as the SuperAdmin.
+ */
+function has_event_owner_access(array $event): bool
+{
+    if ($event['user_id'] === null) {
+        return true;
+    }
+    if (current_user_id() === (int) $event['user_id']) {
+        return true;
+    }
+    return ($_SESSION['user_role'] ?? '') === 'superadmin';
+}
+
+/** Same rule as has_event_owner_access(), but redirects to login instead of returning a bool — for normal page routes. */
+function require_event_owner_access(array $event): void
+{
+    if (has_event_owner_access($event)) {
+        return;
+    }
+    $_SESSION['login_redirect'] = current_url();
+    flash('error', 'Bitte einloggen, um diese Liste zu verwalten.');
+    redirect(base_url('admin/login'));
 }
 
 /**
@@ -606,6 +672,19 @@ function abort(int $code): void
         echo "<h1>{$code}</h1>";
     }
     exit;
+}
+
+/**
+ * The exact URL of the current request, reconstructed from scheme+host+
+ * REQUEST_URI (not via base_url(), which would double up any subdirectory
+ * prefix already present in REQUEST_URI). Used to send a user back to what
+ * they were trying to reach once they've logged in.
+ */
+function current_url(): string
+{
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    return $scheme . '://' . $host . ($_SERVER['REQUEST_URI'] ?? '/');
 }
 
 /** Best-effort client IP (first trusted value found). */

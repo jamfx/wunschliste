@@ -13,11 +13,19 @@
         — <?= h($event['title']) ?>
     </div>
 
+    <?php if (empty($_SESSION['user_logged_in'])): ?>
     <!-- WARNING: Save admin link -->
     <div class="alert alert-warning">
         <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
         <strong><?= h(__('event.admin_link_warning')) ?></strong>
     </div>
+    <?php else: ?>
+    <div class="alert alert-info">
+        <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+        Diese Liste gehört zu deinem Account und ist jederzeit unter
+        <a href="<?= h(base_url('my/lists')) ?>">Meine Listen</a> erreichbar.
+    </div>
+    <?php endif; ?>
 
     <!-- Admin link -->
     <div class="card card--highlight">

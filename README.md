@@ -2,6 +2,7 @@
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](LICENSE.txt)
 ![PHP](https://img.shields.io/badge/PHP-%3E%3D8.1-777bb4.svg)
+![Version](https://img.shields.io/badge/Version-1.1.0-orange.svg)
 
 <a id="deutsch"></a>
 # Wunschliste
@@ -16,7 +17,8 @@ Eine Live-Demo findest du unter: **[wunschliste.n-systeme.de](https://wunschlist
 
 - **Eventverwaltung** – Events mit Artikellisten erstellen und über sichere Admin-Links verwalten
 - **Gastzugang** – Gäste reservieren Artikel über tokenbasierte Links, keine Registrierung nötig
-- **Admin-Backend** – Ein einzelner Superadmin-Account mit optionaler TOTP-Zwei-Faktor-Authentifizierung
+- **Admin-Backend** – SuperAdmin-Account verwaltet die Installation und lädt weitere registrierte User per E-Mail ein; jeder Account kann optional TOTP oder Passkeys als Zwei-Faktor-Authentifizierung einrichten
+- **Zugriffskontrolle** – Listen-Erstellung wahlweise offen für alle oder nur für registrierte User; eigene Listen bleiben dem jeweiligen Account zugeordnet
 - **Mehrsprachig** – Deutsch und Englisch, mit Übersetzungseditor im Admin-Backend
 - **PDF-Export** – Eventübersichten als PDF exportieren (via Dompdf)
 - **E-Mail-Benachrichtigungen** – SMTP, Brevo API oder Sendmail
@@ -33,6 +35,10 @@ Eine Live-Demo findest du unter: **[wunschliste.n-systeme.de](https://wunschlist
 1. Alle Dateien auf den Webserver hochladen.
 2. Das Installationsskript im Browser aufrufen und dem Setup-Assistenten folgen.
 3. Nach der Installation das Installationsskript löschen oder absichern.
+
+## Update
+
+Aktualisierst du eine bestehende Installation (nicht neu installieren), folge der **[Upgrade-Anleitung](UPGRADE.md)** — insbesondere ab Version 1.1.0 ist dafür ein einmaliger Datenbank-Migrationsschritt nötig.
 
 ## Konfiguration
 
@@ -52,7 +58,8 @@ You can see a Live-Demo at: **[wunschliste.n-systeme.de](https://wunschliste.n-s
 
 - **Event management** – Create events with item lists, manage everything via secure admin links
 - **Guest access** – Guests claim items through token-based links, no registration required
-- **Admin backend** – Single superadmin account with optional TOTP two-factor authentication
+- **Admin backend** – A SuperAdmin account manages the installation and invites further registered users by email; every account can optionally set up TOTP or passkeys for two-factor authentication
+- **Access control** – List creation can be open to everyone or restricted to registered users; your own lists stay tied to your account
 - **Multilingual** – German and English, with a translation editor in the admin backend
 - **PDF export** – Export event overviews as PDF (via Dompdf)
 - **Email notifications** – SMTP, Brevo API, or sendmail
@@ -69,6 +76,10 @@ You can see a Live-Demo at: **[wunschliste.n-systeme.de](https://wunschliste.n-s
 1. Upload all files (including the `vendor/` directory) to your web server.
 2. Open the install script in your browser and follow the setup wizard.
 3. After installation, delete or protect the install script.
+
+## Updating
+
+Updating an existing installation (not a fresh install)? Follow the **[upgrade guide](UPGRADE.md)** — starting with version 1.1.0, this requires a one-time database migration step.
 
 ## Configuration
 

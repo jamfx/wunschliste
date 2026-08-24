@@ -40,4 +40,10 @@
         </form>
     </div>
 
+    <p class="text-center text-sm" style="margin-top:1rem;">
+        <a href="<?= h(base_url('forgot-password')) ?>" style="color:var(--text-muted);">
+            <?= h(__('admin.forgot_password_link')) ?>
+        </a>
+    </p>
+
 </div>

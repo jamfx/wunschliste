@@ -67,27 +67,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // Run migration
+        // Run migrations (001 = base schema, 002 = users/multi-account support;
+        // both are applied in order for every fresh install)
         if (empty($errors) && $pdo !== null) {
             try {
-                $sql        = file_get_contents(BASE_DIR . '/migrations/001_initial.sql');
-                $statements = array_filter(
-                    array_map('trim', explode(';', $sql)),
-                    fn($s) => $s !== ''
-                );
-                foreach ($statements as $stmt) {
-                    $pdo->exec($stmt);
+                foreach (['001_initial.sql', '002_multi_user.sql'] as $file) {
+                    $sql        = file_get_contents(BASE_DIR . '/migrations/' . $file);
+                    $statements = array_filter(
+                        array_map('trim', explode(';', $sql)),
+                        fn($s) => $s !== ''
+                    );
+                    foreach ($statements as $stmt) {
+                        $pdo->exec($stmt);
+                    }
                 }
             } catch (PDOException $e) {
                 $errors[] = 'Datenbankschema konnte nicht erstellt werden: ' . $e->getMessage();
             }
         }
 
-        // Create admin account
+        // Create SuperAdmin account
         if (empty($errors) && $pdo !== null) {
             try {
                 $hash = password_hash($adminPassword, PASSWORD_BCRYPT, ['cost' => 12]);
-                $pdo->prepare('INSERT INTO admin (email, password_hash) VALUES (?, ?)')->execute([
+                $pdo->prepare(
+                    "INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, 'superadmin', 'active')"
+                )->execute([
                     $post['admin_email'],
                     $hash,
                 ]);

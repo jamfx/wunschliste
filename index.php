@@ -14,6 +14,8 @@ require_once BASE_DIR . '/src/Controllers/EventController.php';
 require_once BASE_DIR . '/src/Controllers/ItemController.php';
 require_once BASE_DIR . '/src/Controllers/GuestController.php';
 require_once BASE_DIR . '/src/Controllers/AdminController.php';
+require_once BASE_DIR . '/src/Controllers/AccountController.php';
+require_once BASE_DIR . '/src/Controllers/AccountSecurityController.php';
 require_once BASE_DIR . '/src/Controllers/PdfExportController.php';
 require_once BASE_DIR . '/src/Controllers/PageController.php';
 
@@ -25,6 +27,7 @@ $router = new Router();
 $router->get('/',                                  [EventController::class,     'create']);
 $router->post('/',                                 [EventController::class,     'store']);
 $router->get('/event/created/{admin_token}',       [EventController::class,     'created']);
+$router->get('/my/lists',                          [EventController::class,     'myLists']);
 $router->get('/e/{admin_token}/manage',            [EventController::class,     'manage']);
 $router->get('/e/{admin_token}/edit',              [EventController::class,     'editForm']);
 $router->post('/e/{admin_token}/edit',             [EventController::class,     'update']);
@@ -67,11 +70,30 @@ $router->post('/admin/totp',                       [AdminController::class,     
 $router->post('/admin/logout',                     [AdminController::class,     'logout']);
 
 // -----------------------------------------------------------------------
+// Public: account lifecycle (invite acceptance, forgot/reset password)
+// -----------------------------------------------------------------------
+$router->get('/invite/{token}',                    [AccountController::class,   'acceptInviteForm']);
+$router->post('/invite/{token}',                   [AccountController::class,   'acceptInvite']);
+$router->get('/forgot-password',                   [AccountController::class,   'forgotPasswordForm']);
+$router->post('/forgot-password',                  [AccountController::class,   'forgotPassword']);
+$router->get('/reset-password/{token}',            [AccountController::class,   'resetPasswordForm']);
+$router->post('/reset-password/{token}',           [AccountController::class,   'resetPassword']);
+
+// -----------------------------------------------------------------------
 // Admin backend: dashboard + event management
 // -----------------------------------------------------------------------
 $router->get('/admin/dashboard',                   [AdminController::class,     'dashboard']);
 $router->post('/admin/event/{id}/delete',          [AdminController::class,     'deleteEvent']);
 $router->post('/admin/cleanup',                    [AdminController::class,     'cleanup']);
+
+// -----------------------------------------------------------------------
+// Admin backend: user management (SuperAdmin invites registered users)
+// -----------------------------------------------------------------------
+$router->get('/admin/users',                       [AdminController::class,     'users']);
+$router->post('/admin/users/invite',               [AdminController::class,     'inviteUser']);
+$router->post('/admin/users/{id}/resend',          [AdminController::class,     'resendInvite']);
+$router->post('/admin/users/{id}/toggle',          [AdminController::class,     'toggleUserStatus']);
+$router->post('/admin/users/{id}/delete',          [AdminController::class,     'deleteUser']);
 
 // -----------------------------------------------------------------------
 // Admin backend: settings
@@ -83,20 +105,29 @@ $router->post('/admin/settings/logo',              [AdminController::class,     
 $router->post('/admin/settings/logo/delete',       [AdminController::class,     'deleteLogo']);
 
 // -----------------------------------------------------------------------
-// Admin backend: 2FA
+// Admin backend: site-wide security settings (SuperAdmin only)
 // -----------------------------------------------------------------------
-$router->post('/admin/settings/2fa',               [AdminController::class,     'totpEnable']);
 $router->get('/admin/settings/security',           [AdminController::class,     'securitySettings']);
 $router->post('/admin/settings/security',          [AdminController::class,     'saveSecuritySettings']);
 $router->get('/admin/settings/cleanup',            [AdminController::class,     'cleanupSettings']);
 $router->post('/admin/settings/cleanup',           [AdminController::class,     'saveCleanupSettings']);
-$router->post('/admin/settings/2fa/disable',       [AdminController::class,     'totpDisable']);
-$router->post('/admin/settings/2fa/passkey',          [AdminController::class, 'passkeyApi']);
-$router->post('/admin/settings/2fa/passkey/confirm',  [AdminController::class, 'confirmPasskey']);
-$router->post('/admin/settings/2fa/passkey/cancel',   [AdminController::class, 'cancelPendingPasskey']);
-$router->post('/admin/settings/2fa/passkey/delete',   [AdminController::class, 'deletePasskey']);
+// Login-time passkey verification stays here — it runs before a session exists.
 $router->post('/admin/settings/2fa/passkey-auth',  [AdminController::class,     'passkeyAuthApi']);
-$router->post('/admin/settings/2fa/recovery',      [AdminController::class,     'regenerateRecoveryCodes']);
+
+// -----------------------------------------------------------------------
+// Account: personal security (2FA/Passkeys) — any logged-in account, not
+// just the SuperAdmin
+// -----------------------------------------------------------------------
+$router->get('/account/security',                          [AccountSecurityController::class, 'index']);
+$router->post('/account/security/2fa',                      [AccountSecurityController::class, 'totpStart']);
+$router->post('/account/security/2fa/confirm',               [AccountSecurityController::class, 'totpConfirm']);
+$router->post('/account/security/2fa/cancel',                [AccountSecurityController::class, 'cancelTotpSetup']);
+$router->post('/account/security/2fa/disable',                [AccountSecurityController::class, 'totpDisable']);
+$router->post('/account/security/2fa/passkey',                [AccountSecurityController::class, 'passkeyApi']);
+$router->post('/account/security/2fa/passkey/confirm',        [AccountSecurityController::class, 'confirmPasskey']);
+$router->post('/account/security/2fa/passkey/cancel',         [AccountSecurityController::class, 'cancelPendingPasskey']);
+$router->post('/account/security/2fa/passkey/delete',         [AccountSecurityController::class, 'deletePasskey']);
+$router->post('/account/security/2fa/recovery',                [AccountSecurityController::class, 'regenerateRecoveryCodes']);
 
 // -----------------------------------------------------------------------
 // Public: token-protected web-cron cleanup endpoint (see security settings)
