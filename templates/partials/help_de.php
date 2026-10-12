@@ -120,7 +120,8 @@
         <ol style="padding-left:1.25rem;line-height:1.75;">
             <li>Auf der Startseite ein neues Event erstellen.</li>
             <li>Pflichtangabe: <strong>Titel</strong>.</li>
-            <li>Optional: Beschreibung, Datum der Veranstaltung, <strong>E-Mail-Adresse</strong> (für
+            <li>Optional: Beschreibung (mit einfachem Markdown: <code>**fett**</code>, <code>*kursiv*</code>,
+                <code>[Text](https://…)</code>, Listen mit <code>- </code>), Datum der Veranstaltung, <strong>E-Mail-Adresse</strong> (für
                 Benachrichtigungen – ohne Mailadresse funktioniert das Event genauso, es gibt dann aber keine
                 Benachrichtigungen).</li>
             <li>Weitere Einstellungen lassen sich im Bereich „Einstellungen“ aufklappen.</li>

@@ -65,6 +65,7 @@ $v = [
                 <label class="form-label" for="description"><?= h(__('event.description_label')) ?></label>
                 <textarea class="form-textarea" id="description" name="description"
                           rows="3" placeholder="Kurze Beschreibung (optional)"><?= h($v['description']) ?></textarea>
+                <p class="form-hint"><?= h(__('event.description_hint')) ?></p>
             </div>
 
             <div style="display:flex;gap:1rem;flex-wrap:wrap;">

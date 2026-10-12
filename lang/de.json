@@ -42,6 +42,7 @@
     "event.create_title": "Neues Event erstellen",
     "event.title_label": "Event-Titel",
     "event.description_label": "Beschreibung (optional)",
+    "event.description_hint": "Markdown möglich: **fett**, *kursiv*, [Text](https://…), Listen mit „- “.",
     "event.date_label": "Event-Datum (optional)",
     "event.creator_email_label": "Deine E-Mail-Adresse (optional)",
     "event.creator_email_hint": "Ohne Mailadresse funktioniert die Liste genauso, du erhältst dann aber keine Benachrichtigungen (z. B. wenn jemand ein Mitbringsel übernimmt). Du kannst sie später jederzeit über 'Event bearbeiten' nachtragen.",

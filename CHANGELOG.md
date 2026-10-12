@@ -11,6 +11,13 @@ upgrade.
 
 ## [Unreleased]
 
+### Added
+
+- Event descriptions support a restricted Markdown subset (bold, italic,
+  links, lists, line breaks). Raw HTML, images and non-http(s) links are
+  rendered as plain text. Applies to the guest view, the management page
+  and the PDF export.
+
 ## [1.1.0] - 2026-08-24
 
 ### Added

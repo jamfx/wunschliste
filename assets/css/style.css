@@ -780,3 +780,9 @@ legend {
     font-size: 1.125rem;
     margin-bottom: .5rem;
 }
+
+/* Rendered Markdown (event description) */
+.md p { margin: 0 0 .5rem; }
+.md > :last-child { margin-bottom: 0; }
+.md ul, .md ol { margin: 0 0 .5rem; padding-left: 1.25rem; }
+.md a { text-decoration: underline; }

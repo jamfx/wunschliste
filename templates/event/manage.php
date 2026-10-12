@@ -51,7 +51,7 @@ $adminToken  = $event['admin_token'];
             </p>
             <?php endif; ?>
             <?php if (!empty($event['description'])): ?>
-            <p style="margin-top:.5rem;color:var(--text-muted);font-size:.9375rem;"><?= h($event['description']) ?></p>
+            <div class="md" style="margin-top:.5rem;color:var(--text-muted);font-size:.9375rem;"><?= md($event['description']) ?></div>
             <?php endif; ?>
         </div>
         <div style="display:flex;gap:.5rem;flex-wrap:wrap;">

@@ -120,7 +120,8 @@
         <ol style="padding-left:1.25rem;line-height:1.75;">
             <li>Create a new event on the homepage.</li>
             <li>Required: <strong>title</strong>.</li>
-            <li>Optional: description, event date, <strong>email address</strong> (for notifications – the event
+            <li>Optional: description (simple Markdown works: <code>**bold**</code>, <code>*italic*</code>,
+                <code>[text](https://…)</code>, lists with <code>- </code>), event date, <strong>email address</strong> (for notifications – the event
                 works the same without one, you just won't receive any notifications).</li>
             <li>Further options can be expanded under "Settings".</li>
             <li>The event is created immediately on submit – no email confirmation and no login required. Instead

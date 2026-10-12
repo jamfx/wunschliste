@@ -42,6 +42,7 @@
     "event.create_title": "Create New Event",
     "event.title_label": "Event Title",
     "event.description_label": "Description (optional)",
+    "event.description_hint": "Markdown supported: **bold**, *italic*, [text](https://…), lists with \"- \".",
     "event.date_label": "Event Date (optional)",
     "event.creator_email_label": "Your Email Address (optional)",
     "event.creator_email_hint": "The list works fine without an e-mail address, but you won't receive any notifications (e.g. when someone claims an item). You can add it later any time via 'Edit Event'.",

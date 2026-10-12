@@ -30,6 +30,8 @@ $fontSize = max(8, min(24, (int) ($s['pdf_font_size'] ?? 12)));
     margin: 0 0 4px;
     color: #1a1a1a;
   }
+  .md p, .md ul, .md ol { margin: 0 0 3px; }
+  .md ul, .md ol { padding-left: 14px; }
   .meta {
     font-size: <?= max(7, $fontSize - 2) ?>pt;
     color: #666;
@@ -143,7 +145,7 @@ if ($showLogo && $logoPath !== '') {
 <?php endif; ?>
     Erstellt: <?= htmlspecialchars(date('d.m.Y', strtotime($event['created_at'])), ENT_QUOTES) ?>
 <?php if (!empty($event['description'])): ?>
-    <br><?= htmlspecialchars($event['description'], ENT_QUOTES) ?>
+    <div class="md"><?= md($event['description']) ?></div>
 <?php endif; ?>
 </div>
 

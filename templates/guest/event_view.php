@@ -35,9 +35,9 @@ $progressPct = $progressTotal > 0
             <?php endif; ?>
 
             <?php if (!empty($event['description'])): ?>
-            <p style="color:var(--text-muted);font-size:.9375rem;margin-top:.5rem;white-space:pre-line;">
-                <?= h($event['description']) ?>
-            </p>
+            <div class="md" style="color:var(--text-muted);font-size:.9375rem;margin-top:.5rem;">
+                <?= md($event['description']) ?>
+            </div>
             <?php endif; ?>
         </div>
 

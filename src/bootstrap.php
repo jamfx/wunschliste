@@ -176,6 +176,104 @@ function h(string $str): string
     return htmlspecialchars($str, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+/**
+ * Renders a restricted Markdown subset to safe HTML.
+ *
+ * Supported: **bold**, *italic* / _italic_, [text](https://…), bare http(s)
+ * URLs, "- " / "* " bullet lists, "1. " numbered lists, paragraphs and line
+ * breaks. Everything else — including raw HTML, images and other URL schemes —
+ * stays plain (escaped) text. Input is escaped FIRST, so no user-supplied
+ * markup can survive.
+ */
+function md(string $text): string
+{
+    $text = str_replace(["\0", "\r\n", "\r"], ['', "\n", "\n"], trim($text));
+    if ($text === '') {
+        return '';
+    }
+
+    $inline = static function (string $s): string {
+        $stash = [];
+        $keep = static function (string $html) use (&$stash): string {
+            $stash[] = $html;
+            return "\0" . (count($stash) - 1) . "\0";
+        };
+        $a = static fn(string $url, string $label): string =>
+            '<a href="' . $url . '" target="_blank" rel="noopener noreferrer nofollow">' . $label . '</a>';
+        $urlChars = '(?:(?!&quot;|&#039;|&lt;|&gt;)[^\s<>()])+';
+
+        // [text](https://…)
+        $s = preg_replace_callback(
+            '~\[([^\]\n]+)\]\((https?://' . $urlChars . ')\)~i',
+            static fn($m) => $keep($a($m[2], $m[1])),
+            $s
+        );
+        // bare URLs (trailing punctuation stays outside the link)
+        $s = preg_replace_callback(
+            '~(?<![\w"=/])https?://' . $urlChars . '~i',
+            static function ($m) use ($keep, $a) {
+                $url = rtrim($m[0], '.,;:!?');
+                return $keep($a($url, $url)) . substr($m[0], strlen($url));
+            },
+            $s
+        );
+
+        $s = preg_replace('~\*\*(?=\S)(.+?)(?<=\S)\*\*~s', '<strong>$1</strong>', $s);
+        $s = preg_replace('~(?<![\w*])\*(?=[^\s*])(.+?)(?<=[^\s*])\*(?![\w*])~s', '<em>$1</em>', $s);
+        $s = preg_replace('~(?<![\w_])_(?=[^\s_])(.+?)(?<=[^\s_])_(?![\w_])~s', '<em>$1</em>', $s);
+
+        return preg_replace_callback('~\0(\d+)\0~', static fn($m) => $stash[(int) $m[1]], $s);
+    };
+
+    $out = '';
+    $para = [];
+    $list = [];
+    $listTag = '';
+
+    $flushPara = static function () use (&$para, &$out, $inline): void {
+        if ($para) {
+            $out .= '<p>' . implode('<br>', array_map($inline, $para)) . '</p>';
+            $para = [];
+        }
+    };
+    $flushList = static function () use (&$list, &$listTag, &$out, $inline): void {
+        if ($list) {
+            $out .= "<$listTag>" . implode('', array_map(static fn($i) => '<li>' . $inline($i) . '</li>', $list)) . "</$listTag>";
+            $list = [];
+            $listTag = '';
+        }
+    };
+
+    foreach (explode("\n", $text) as $line) {
+        $line = h(rtrim($line));
+        if (trim($line) === '') {
+            $flushPara();
+            $flushList();
+        } elseif (preg_match('~^\s{0,3}[-*]\s+(.+)$~', $line, $m)) {
+            $flushPara();
+            if ($listTag !== 'ul') {
+                $flushList();
+                $listTag = 'ul';
+            }
+            $list[] = $m[1];
+        } elseif (preg_match('~^\s{0,3}\d{1,3}[.)]\s+(.+)$~', $line, $m)) {
+            $flushPara();
+            if ($listTag !== 'ol') {
+                $flushList();
+                $listTag = 'ol';
+            }
+            $list[] = $m[1];
+        } else {
+            $flushList();
+            $para[] = $line;
+        }
+    }
+    $flushPara();
+    $flushList();
+
+    return $out;
+}
+
 function csrf_field(): string
 {
     return '<input type="hidden" name="csrf_token" value="' . h($_SESSION['csrf_token']) . '">';
