@@ -786,3 +786,10 @@ legend {
 .md > :last-child { margin-bottom: 0; }
 .md ul, .md ol { margin: 0 0 .5rem; padding-left: 1.25rem; }
 .md a { text-decoration: underline; }
+
+/* PDF button in the guest event header: floats right on wide screens,
+   sits on its own row on phones so the description keeps the full width. */
+.event-pdf-btn { float: right; margin: 0 0 .5rem .75rem; white-space: nowrap; }
+@media (max-width: 600px) {
+    .event-pdf-btn { float: none; display: inline-flex; margin: 0 0 .75rem; }
+}

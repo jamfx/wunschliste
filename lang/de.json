@@ -124,7 +124,7 @@
     "guest.claim_section": "Mitbringsel beanspruchen",
     "guest.suggest_section": "Mitbringsel vorschlagen",
     "guest.suggest_title": "Mitbringsel vorschlagen",
-    "guest.suggest_description": "Fehlt noch etwas auf der Liste? Schlag es vor — der Organisator kann es dann freigeben.",
+    "guest.suggest_description": "Fehlt noch etwas auf der Liste? Schlag es vor — der Organisator kann es dann freigeben. Deinen Namen brauchen wir, damit der Organisator weiß, von wem der Vorschlag kommt. Mitbringen musst du es deshalb nicht.",
     "guest.suggest_name": "Mitbringsel-Name",
     "guest.suggest_submit": "Vorschlagen",
     "guest.suggest_success": "Dein Vorschlag wurde eingereicht und wartet auf Freigabe.",

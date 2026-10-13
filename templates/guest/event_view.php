@@ -23,34 +23,30 @@ $progressPct = $progressTotal > 0
 <!-- Event header                                                      -->
 <!-- ================================================================ -->
 <div class="card" style="margin-bottom:1.25rem;">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;flex-wrap:wrap;">
-        <div style="flex:1;min-width:0;">
-            <h1 style="font-size:1.5rem;margin-bottom:.375rem;"><?= h($event['title']) ?></h1>
+    <?php if (!$giftMode): ?>
+    <a href="<?= h(base_url('g/' . $guestToken . '/pdf')) ?>"
+       class="btn btn-secondary btn-sm event-pdf-btn"
+       title="<?= h(__('pdf.download')) ?>">
+        <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
+        <?= h(__('pdf.download')) ?>
+    </a>
+    <?php endif; ?>
 
-            <?php if (!empty($event['event_date'])): ?>
-            <p class="text-muted text-sm" style="margin-bottom:.375rem;">
-                <i class="fa-regular fa-calendar" aria-hidden="true"></i>
-                <?= h(date('d.m.Y', strtotime($event['event_date']))) ?>
-            </p>
-            <?php endif; ?>
+    <h1 style="font-size:1.5rem;margin-bottom:.375rem;"><?= h($event['title']) ?></h1>
 
-            <?php if (!empty($event['description'])): ?>
-            <div class="md" style="color:var(--text-muted);font-size:.9375rem;margin-top:.5rem;">
-                <?= md($event['description']) ?>
-            </div>
-            <?php endif; ?>
-        </div>
+    <?php if (!empty($event['event_date'])): ?>
+    <p class="text-muted text-sm" style="margin-bottom:.375rem;">
+        <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+        <?= h(date('d.m.Y', strtotime($event['event_date']))) ?>
+    </p>
+    <?php endif; ?>
 
-        <?php if (!$giftMode): ?>
-        <a href="<?= h(base_url('g/' . $guestToken . '/pdf')) ?>"
-           class="btn btn-secondary btn-sm"
-           title="<?= h(__('pdf.download')) ?>"
-           style="flex-shrink:0;white-space:nowrap;">
-            <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
-            <?= h(__('pdf.download')) ?>
-        </a>
-        <?php endif; ?>
+    <?php if (!empty($event['description'])): ?>
+    <div class="md" style="color:var(--text-muted);font-size:.9375rem;margin-top:.5rem;">
+        <?= md($event['description']) ?>
     </div>
+    <?php endif; ?>
+    <div style="clear:both;"></div>
 </div>
 
 <!-- ================================================================ -->

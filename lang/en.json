@@ -124,7 +124,7 @@
     "guest.claim_section": "Claim Items",
     "guest.suggest_section": "Suggest an Item",
     "guest.suggest_title": "Suggest an Item",
-    "guest.suggest_description": "Something missing from the list? Suggest it — the organiser can then approve it.",
+    "guest.suggest_description": "Something missing from the list? Suggest it — the organiser can then approve it. We ask for your name so the organiser knows who the suggestion is from. That doesn't mean you have to bring it.",
     "guest.suggest_name": "Item Name",
     "guest.suggest_submit": "Suggest",
     "guest.suggest_success": "Your suggestion has been submitted and is awaiting approval.",
