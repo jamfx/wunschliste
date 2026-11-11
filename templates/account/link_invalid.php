@@ -9,10 +9,10 @@
     <i class="fa-solid fa-link-slash"
        aria-hidden="true"
        style="font-size:2.5rem;color:var(--text-muted);"></i>
-    <h1 style="font-size:1.5rem;margin-top:.5rem;"><?= h($pageTitle ?? 'Link ungültig') ?></h1>
-    <p class="text-muted" style="margin:1rem 0 1.5rem;"><?= h($message ?? 'Dieser Link ist ungültig oder abgelaufen.') ?></p>
+    <h1 style="font-size:1.5rem;margin-top:.5rem;"><?= h($pageTitle ?? __('account.link_invalid_title')) ?></h1>
+    <p class="text-muted" style="margin:1rem 0 1.5rem;"><?= h($message ?? __('account.link_invalid_message')) ?></p>
     <a href="<?= h(base_url('admin/login')) ?>" class="btn btn-primary">
         <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
-        Zum Login
+        <?= h(__('account.to_login')) ?>
     </a>
 </div>

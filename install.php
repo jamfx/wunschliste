@@ -21,7 +21,7 @@ $post   = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // CSRF guard
     if (!csrf_verify()) {
-        $errors[] = 'Ungültiger CSRF-Token. Bitte die Seite neu laden und erneut versuchen.';
+        $errors[] = __('install.err_csrf');
     } else {
         $post = [
             'db_host'   => trim($_POST['db_host']  ?? ''),
@@ -35,18 +35,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $adminPasswordConfirm = $_POST['admin_password_confirm'] ?? '';
 
         // Validation
-        if (empty($post['db_host']))  $errors[] = 'Datenbank-Host ist erforderlich.';
-        if (empty($post['db_name']))  $errors[] = 'Datenbankname ist erforderlich.';
-        if (empty($post['db_user']))  $errors[] = 'Datenbankbenutzer ist erforderlich.';
+        if (empty($post['db_host']))  $errors[] = __('install.err_db_host');
+        if (empty($post['db_name']))  $errors[] = __('install.err_db_name');
+        if (empty($post['db_user']))  $errors[] = __('install.err_db_user');
 
         if (empty($post['admin_email']) || !filter_var($post['admin_email'], FILTER_VALIDATE_EMAIL)) {
-            $errors[] = 'Eine gültige Admin-E-Mail-Adresse ist erforderlich.';
+            $errors[] = __('install.err_admin_email');
         }
         if (strlen($adminPassword) < 8) {
-            $errors[] = 'Das Passwort muss mindestens 8 Zeichen lang sein.';
+            $errors[] = __('validation.password_min_8');
         }
         if ($adminPassword !== $adminPasswordConfirm) {
-            $errors[] = 'Die Passwörter stimmen nicht überein.';
+            $errors[] = __('validation.password_mismatch');
         }
 
         // Test DB connection
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 ]);
             } catch (PDOException $e) {
-                $errors[] = 'Datenbankverbindung fehlgeschlagen: ' . $e->getMessage();
+                $errors[] = __('install.err_db_connect', ['error' => $e->getMessage()]);
             }
         }
 
@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $migrator->markBaselineApplied();
                 $migrator->run();
             } catch (Throwable $e) {
-                $errors[] = 'Datenbankschema konnte nicht erstellt werden: ' . $e->getMessage();
+                $errors[] = __('install.err_schema', ['error' => $e->getMessage()]);
             }
         }
 
@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $hash,
                 ]);
             } catch (PDOException $e) {
-                $errors[] = 'Admin-Account konnte nicht erstellt werden: ' . $e->getMessage();
+                $errors[] = __('install.err_admin_create', ['error' => $e->getMessage()]);
             }
         }
 
@@ -125,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 . '];' . PHP_EOL;
 
             if (file_put_contents(CONFIG_PATH, $configContent) === false) {
-                $errors[] = 'config.php konnte nicht geschrieben werden. Bitte prüfe die Schreibrechte im config/-Verzeichnis.';
+                $errors[] = __('install.err_config_write');
             }
         }
 
@@ -137,12 +137,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 @rename(__FILE__, __FILE__ . '.done');
             }
 
-            flash('success', 'Installation erfolgreich! Du kannst dich jetzt einloggen.');
+            flash('success', __('install.done_success'));
             redirect(base_url('admin/login'));
         }
     }
 }
 
 // Render — layout.php handles null $db gracefully
-$pageTitle = 'Installation';
+$pageTitle = __('install.title');
 render('install', ['errors' => $errors, 'post' => $post]);

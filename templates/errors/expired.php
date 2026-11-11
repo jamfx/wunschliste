@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= h($GLOBALS['translator']->getLocale()) ?>">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Event abgelaufen</title>
+<title><?= h(__('error.expired_tag')) ?></title>
 <style>
   body{margin:0;padding:2rem;font-family:system-ui,sans-serif;background:#f5f5f5;color:#333;text-align:center}
   .box{max-width:480px;margin:4rem auto;background:#fff;border-radius:12px;padding:2.5rem;box-shadow:0 1px 6px rgba(0,0,0,.1)}
@@ -17,9 +17,9 @@
 <body>
   <div class="box">
     <div class="icon">&#x23F3;</div>
-    <h1>Dieses Event ist abgelaufen</h1>
-    <p>Der Link ist nicht mehr gültig. Das Event wurde automatisch gelöscht oder ist nicht mehr aktiv.</p>
-    <a href="/">Eigenes Event erstellen</a>
+    <h1><?= h(__('error.expired_title')) ?></h1>
+    <p><?= h(__('error.expired_text')) ?></p>
+    <a href="<?= h(function_exists('base_url') ? base_url() : '/') ?>"><?= h(__('error.create_own')) ?></a>
   </div>
 </body>
 </html>

@@ -1,9 +1,14 @@
+<?php
+$e    = static fn($s): string => htmlspecialchars((string) $s, ENT_QUOTES);
+$b    = static fn($s): string => '<strong>' . htmlspecialchars((string) $s, ENT_QUOTES) . '</strong>';
+$date = static fn($d): string => date($t('format.date'), strtotime((string) $d));
+?>
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= $e($locale) ?>">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Passwort zurücksetzen</title>
+<title><?= $e($t('mail.reset_title')) ?></title>
 <style>
   body{margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;color:#333}
   .wrap{max-width:560px;margin:32px auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.1)}
@@ -17,24 +22,22 @@
 <body>
 <div class="wrap">
   <div class="head">
-    <h1>&#x1F511; Passwort zurücksetzen</h1>
+    <h1>&#x1F511; <?= $e($t('mail.reset_title')) ?></h1>
   </div>
   <div class="body">
-    <p>Hallo,<br>
-    für deinen Account bei <strong><?= htmlspecialchars(site_title(), ENT_QUOTES) ?></strong> wurde ein Zurücksetzen des Passworts angefordert.
-    Klicke auf den folgenden Link, um ein neues Passwort festzulegen:</p>
+    <p><?= $e($t('mail.hello')) ?><br>
+    <?= $t('mail.reset_intro', ['site' => $b(site_title())]) ?></p>
 
-    <a class="link-btn" href="<?= htmlspecialchars($resetUrl, ENT_QUOTES) ?>">
-      Neues Passwort festlegen
+    <a class="link-btn" href="<?= $e($resetUrl) ?>">
+      <?= $e($t('mail.reset_button')) ?>
     </a>
 
     <p style="margin-top:24px;font-size:.875rem;color:#666;">
-      Dieser Link ist 1 Stunde gültig. Falls du das nicht angefordert hast, kannst du diese E-Mail ignorieren —
-      dein Passwort bleibt unverändert.
+      <?= $e($t('mail.reset_note')) ?>
     </p>
   </div>
   <div class="footer">
-    Diese E-Mail wurde automatisch von <?= htmlspecialchars(site_title(), ENT_QUOTES) ?> gesendet.
+    <?= $e($t('mail.auto_footer', ['site' => site_title()])) ?>
   </div>
 </div>
 </body>

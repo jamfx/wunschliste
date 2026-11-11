@@ -4,13 +4,13 @@
  */
 $cards = [
     ['url' => base_url('admin/settings/design'), 'icon' => 'fa-solid fa-palette',       'color' => '#8B5CF6',
-     'title' => __('admin.settings_design'),       'desc' => 'Primärfarbe, Logo, Impressum, Datenschutz'],
+     'title' => __('admin.settings_design'),       'desc' => __('admin.settings_design_desc')],
     ['url' => base_url('admin/email'),            'icon' => 'fa-solid fa-envelope',      'color' => '#3B82F6',
-     'title' => __('admin.settings_email'),        'desc' => 'SMTP, Brevo API, Absender-Adresse'],
+     'title' => __('admin.settings_email'),        'desc' => __('admin.settings_email_desc')],
     ['url' => base_url('admin/pdf-settings'),     'icon' => 'fa-solid fa-file-pdf',      'color' => '#EF4444',
-     'title' => __('admin.settings_pdf'),          'desc' => 'Seitengröße, Schrift, Logo, Fußzeile'],
+     'title' => __('admin.settings_pdf'),          'desc' => __('admin.settings_pdf_desc')],
     ['url' => base_url('admin/settings/security'), 'icon' => 'fa-solid fa-lock',          'color' => '#EC4899',
-     'title' => __('admin.settings_security'),       'desc' => 'Sperr-Limits, Bedenkzeit, Zwei-Faktor-Authentifizierung'],
+     'title' => __('admin.settings_security'),       'desc' => __('admin.settings_security_desc')],
 ];
 ?>
 <div class="admin-layout">

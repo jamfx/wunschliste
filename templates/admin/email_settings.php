@@ -29,7 +29,7 @@ $v = fn(string $k) => h($settings[$k] ?? '');
 
             <!-- SMTP fields -->
             <div data-transport="smtp" style="margin-top:.5rem;">
-                <h3 style="font-size:.9375rem;margin-bottom:.875rem;color:var(--text-muted);">SMTP-Verbindung</h3>
+                <h3 style="font-size:.9375rem;margin-bottom:.875rem;color:var(--text-muted);"><?= h(__('admin.email_smtp_section')) ?></h3>
                 <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
                     <div class="form-group" style="flex:1;min-width:200px;">
                         <label class="form-label" for="smtp_host"><?= h(__('admin.email_smtp_host')) ?></label>
@@ -53,14 +53,14 @@ $v = fn(string $k) => h($settings[$k] ?? '');
                         <label class="form-label" for="smtp_password"><?= h(__('admin.email_smtp_pass')) ?></label>
                         <input class="form-input" type="password" id="smtp_password" name="smtp_password"
                                value="<?= $v('smtp_password') ?>" autocomplete="new-password"
-                               placeholder="<?= empty($settings['smtp_password']) ? 'Leer = kein Passwort' : '••••••••' ?>">
+                               placeholder="<?= empty($settings['smtp_password']) ? __('admin.email_smtp_pass_empty') : '••••••••' ?>">
                     </div>
                 </div>
             </div>
 
             <!-- Brevo API field -->
             <div data-transport="brevo_api" style="margin-top:.5rem;">
-                <h3 style="font-size:.9375rem;margin-bottom:.875rem;color:var(--text-muted);">Brevo-Konfiguration</h3>
+                <h3 style="font-size:.9375rem;margin-bottom:.875rem;color:var(--text-muted);"><?= h(__('admin.email_brevo_section')) ?></h3>
                 <div class="form-group">
                     <label class="form-label" for="api_key"><?= h(__('admin.email_api_key')) ?></label>
                     <input class="form-input" type="password" id="api_key" name="api_key"
@@ -80,7 +80,7 @@ $v = fn(string $k) => h($settings[$k] ?? '');
                 <div class="form-group" style="flex:1;min-width:200px;">
                     <label class="form-label" for="from_name"><?= h(__('admin.email_from_name')) ?></label>
                     <input class="form-input" type="text" id="from_name" name="from_name"
-                           value="<?= $v('from_name') ?>" placeholder="Mitbringliste">
+                           value="<?= $v('from_name') ?>" placeholder="<?= h(__('app.title')) ?>">
                 </div>
             </div>
 
@@ -96,11 +96,11 @@ $v = fn(string $k) => h($settings[$k] ?? '');
             <?= csrf_field() ?>
             <h3 style="font-size:.9375rem;margin-bottom:.875rem;">
                 <i class="fa-solid fa-vial" aria-hidden="true"></i>
-                Test-E-Mail senden
+                <?= h(__('admin.email_test_title')) ?>
             </h3>
             <div style="display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap;">
                 <div class="form-group" style="flex:1;min-width:200px;margin-bottom:0;">
-                    <label class="form-label" for="test_email">Empfänger</label>
+                    <label class="form-label" for="test_email"><?= h(__('admin.email_test_recipient')) ?></label>
                     <input class="form-input" type="email" id="test_email" name="test_email"
                            placeholder="test@example.com">
                 </div>
@@ -109,7 +109,7 @@ $v = fn(string $k) => h($settings[$k] ?? '');
                     <?= h(__('admin.email_test')) ?>
                 </button>
             </div>
-            <p class="form-hint" style="margin-top:.5rem;">Leer lassen → Test-Mail geht an deine Admin-E-Mail.</p>
+            <p class="form-hint" style="margin-top:.5rem;"><?= h(__('admin.email_test_hint')) ?></p>
         </form>
 
     </div>

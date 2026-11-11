@@ -47,7 +47,7 @@ $adminToken  = $event['admin_token'];
             <?php if (!empty($event['event_date'])): ?>
             <p class="text-muted text-sm">
                 <i class="fa-regular fa-calendar" aria-hidden="true"></i>
-                <?= h(date('d.m.Y', strtotime($event['event_date']))) ?>
+                <?= h(format_date($event['event_date'])) ?>
             </p>
             <?php endif; ?>
             <?php if (!empty($event['description'])): ?>
@@ -65,7 +65,7 @@ $adminToken  = $event['admin_token'];
             </a>
             <a href="<?= h($guestUrl) ?>" class="btn btn-secondary btn-sm" target="_blank" rel="noopener">
                 <i class="fa-solid fa-eye" aria-hidden="true"></i>
-                Gäste-Ansicht
+                <?= h(__('event.guest_view')) ?>
             </a>
         </div>
     </div>
@@ -89,7 +89,7 @@ $adminToken  = $event['admin_token'];
                     data-copy-target="guestLinkShare"
                     data-success-msg="<?= h(__('event.copy_success')) ?>">
                 <i class="fa-solid fa-copy" aria-hidden="true"></i>
-                Kopieren
+                <?= h(__('common.copy')) ?>
             </button>
         </div>
     </div>
@@ -129,7 +129,7 @@ $adminToken  = $event['admin_token'];
             <div class="form-group" style="flex:1;min-width:160px;margin-bottom:0;">
                 <label class="form-label" for="new_item_name"><?= h(__('item.name')) ?></label>
                 <input class="form-input" type="text" id="new_item_name" name="name"
-                       placeholder="z.B. Salat" maxlength="255" required>
+                       placeholder="<?= h(__('item.name_placeholder')) ?>" maxlength="255" required>
             </div>
             <div class="form-group" style="width:6rem;margin-bottom:0;">
                 <label class="form-label" for="new_item_qty"><?= h(__('item.quantity')) ?></label>
@@ -251,6 +251,16 @@ foreach ($approvedItems as $itemIndex => $item):
                 <i class="fa-solid fa-user" aria-hidden="true"></i>
                 <?= h($claim['guest_name']) ?>
                 <?= $claim['quantity'] > 1 ? '×' . $claim['quantity'] : '' ?>
+                <form method="post" style="display:inline;margin:0;"
+                      action="<?= h(base_url('e/' . $adminToken . '/claims/' . $claim['id'] . '/delete')) ?>">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="claim-remove-btn"
+                            style="background:none;border:none;cursor:pointer;color:var(--danger);padding:0 0 0 .25rem;"
+                            data-confirm="<?= h(__('item.claim_remove_confirm', ['name' => $claim['guest_name'], 'item' => $item['name']])) ?>"
+                            title="<?= h(__('item.claim_remove')) ?>" aria-label="<?= h(__('item.claim_remove')) ?> (<?= h($claim['guest_name']) ?>)">
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    </button>
+                </form>
             </span>
             <?php endforeach; ?>
         </div>
@@ -299,7 +309,7 @@ foreach ($approvedItems as $itemIndex => $item):
 <div style="margin-top:1.5rem;">
     <h2 style="font-size:1.125rem;margin-bottom:.75rem;">
         <i class="fa-solid fa-clock-rotate-left" aria-hidden="true" style="color:var(--warning);"></i>
-        Vorschläge von Gästen
+        <?= h(__('event.suggestions_title')) ?>
         <span class="badge badge-pending" style="vertical-align:middle;"><?= count($pendingItems) ?></span>
     </h2>
 
@@ -312,6 +322,12 @@ foreach ($approvedItems as $itemIndex => $item):
             <span class="text-sm text-muted" style="display:block;">
                 <i class="fa-solid fa-user" aria-hidden="true"></i>
                 <?= h(__('item.suggested_by', ['name' => $item['suggested_by_guest']])) ?>
+            </span>
+            <?php endif; ?>
+            <?php if ((int) ($item['suggester_brings_qty'] ?? 0) > 0): ?>
+            <span class="text-sm" style="display:block;color:var(--success);">
+                <i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i>
+                <?= h(__('item.suggester_brings_note', ['quantity' => (int) $item['suggester_brings_qty']])) ?>
             </span>
             <?php endif; ?>
             <?php if (!empty($item['suggester_email'])): ?>
@@ -345,7 +361,7 @@ foreach ($approvedItems as $itemIndex => $item):
                 </button>
                 <button type="submit" class="btn btn-danger btn-sm"
                         formaction="<?= h(base_url('e/' . $adminToken . '/items/' . $item['id'] . '/reject')) ?>"
-                        data-confirm="Vorschlag &quot;<?= h($item['name']) ?>&quot; ablehnen und löschen?">
+                        data-confirm="<?= h(__('item.reject_confirm', ['name' => $item['name']])) ?>">
                     <i class="fa-solid fa-xmark" aria-hidden="true"></i>
                     <?= h(__('item.reject')) ?>
                 </button>
@@ -358,6 +374,6 @@ foreach ($approvedItems as $itemIndex => $item):
 <?php elseif ($event['guests_can_suggest'] && empty($pendingItems)): ?>
 <p class="text-muted text-sm" style="margin-top:.5rem;">
     <i class="fa-solid fa-inbox" aria-hidden="true"></i>
-    Keine offenen Vorschläge.
+    <?= h(__('event.no_open_suggestions')) ?>
 </p>
 <?php endif; ?>

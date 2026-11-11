@@ -103,7 +103,7 @@ class AccountSecurityController
         $recoveryCount = is_array($storedHashes) ? count($storedHashes) : 0;
 
         render('account/security', [
-            'pageTitle'             => 'Meine Sicherheit',
+            'pageTitle'             => __('admin.account_security'),
             'admin'                 => $user,
             'qrSvg'                 => $qrSvg,
             'pendingSecret'         => $pendingSecret,
@@ -134,7 +134,7 @@ class AccountSecurityController
 
         $secret = $_SESSION['totp_setup_secret'] ?? '';
         if ($secret === '') {
-            flash('error', 'Session abgelaufen. Bitte Einrichtung erneut starten.');
+            flash('error', __('security.session_expired'));
             redirect(base_url('account/security'));
         }
 
@@ -166,12 +166,12 @@ class AccountSecurityController
 
         $pending = $_SESSION['totp_pending'] ?? null;
         if (!$pending || empty($pending['secret'])) {
-            flash('error', 'Keine ausstehende TOTP-Einrichtung gefunden.');
+            flash('error', __('security.no_pending_totp'));
             redirect(base_url('account/security'));
         }
 
         if (empty($_POST['confirmed'])) {
-            flash('error', 'Bitte bestätige, dass du die Notfallcodes gesichert hast.');
+            flash('error', __('security.confirm_recovery'));
             redirect(base_url('account/security'));
         }
 
@@ -196,7 +196,7 @@ class AccountSecurityController
 
         unset($_SESSION['totp_pending'], $_SESSION['totp_setup_secret']);
 
-        flash('success', '2FA wurde erfolgreich aktiviert. Bewahre deine Recovery-Codes sicher auf!');
+        flash('success', __('security.2fa_enabled'));
         redirect(base_url('account/security'));
     }
 
@@ -213,7 +213,7 @@ class AccountSecurityController
 
         unset($_SESSION['totp_pending']);
 
-        flash('info', 'TOTP-Einrichtung abgebrochen.');
+        flash('info', __('security.totp_setup_cancelled'));
         redirect(base_url('account/security'));
     }
 
@@ -229,7 +229,7 @@ class AccountSecurityController
         $user     = $this->getCurrentUser();
 
         if (!password_verify($password, (string) $user['password_hash'])) {
-            flash('error', 'Falsches Passwort. 2FA wurde nicht deaktiviert.');
+            flash('error', __('security.wrong_password'));
             redirect(base_url('account/security'));
         }
 
@@ -247,7 +247,7 @@ class AccountSecurityController
             'recovery_codes' => $hasPasskeys ? $user['recovery_codes'] : null,
         ], ['id' => $user['id']]);
 
-        flash('success', '2FA wurde deaktiviert.');
+        flash('success', __('security.2fa_disabled'));
         redirect(base_url('account/security'));
     }
 
@@ -334,7 +334,7 @@ class AccountSecurityController
                 $challenge      = $_SESSION['webauthn_register_challenge'] ?? null;
 
                 if (!$challenge) {
-                    throw new RuntimeException('Keine Challenge in der Session.');
+                    throw new RuntimeException(__('security.no_challenge'));
                 }
 
                 $wa   = new WebAuthn($siteName, $rpId, null, true);
@@ -379,7 +379,7 @@ class AccountSecurityController
         $codes   = $_SESSION['passkey_pending_codes'] ?? [];
 
         if (!$pending || empty($pending['credential_id'])) {
-            flash('error', 'Keine ausstehende Passkey-Registrierung gefunden.');
+            flash('error', __('security.no_pending_passkey'));
             redirect(base_url('account/security'));
         }
 
@@ -398,13 +398,13 @@ class AccountSecurityController
             $hashedCodes = array_map(fn($c) => password_hash($c, PASSWORD_BCRYPT), $codes);
             $db->update('users', ['recovery_codes' => json_encode($hashedCodes)], ['id' => $userId]);
         } catch (Throwable $e) {
-            flash('error', 'Fehler beim Speichern des Passkeys: ' . $e->getMessage());
+            flash('error', __('security.passkey_save_failed', ['error' => $e->getMessage()]));
             redirect(base_url('account/security'));
         }
 
         unset($_SESSION['passkey_pending'], $_SESSION['passkey_pending_codes']);
 
-        flash('success', 'Passkey "' . h($pending['device_name']) . '" wurde gespeichert.');
+        flash('success', __('security.passkey_saved', ['name' => $pending['device_name']]));
         redirect(base_url('account/security'));
     }
 
@@ -421,7 +421,7 @@ class AccountSecurityController
 
         unset($_SESSION['passkey_pending'], $_SESSION['passkey_pending_codes']);
 
-        flash('info', 'Passkey-Registrierung abgebrochen.');
+        flash('info', __('security.passkey_setup_cancelled'));
         redirect(base_url('account/security'));
     }
 
@@ -481,7 +481,7 @@ class AccountSecurityController
         } catch (Throwable) {}
 
         if (!$hasTOTP && !$hasPasskeys) {
-            flash('error', 'Keine 2FA-Methode aktiv. Aktiviere zuerst TOTP oder einen Passkey.');
+            flash('error', __('security.no_2fa_method'));
             redirect(base_url('account/security'));
         }
 

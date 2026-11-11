@@ -302,7 +302,8 @@
         <p style="margin-bottom:0;">
             If the organizer has allowed it, a new item can be suggested at the bottom of the list (item name +
             your name, optionally a quantity). The suggestion only appears in the public list once the organizer
-            approves it. If you enter an email address, you will be notified of the decision (accepted or
+            approves it. With the "I will bring this too" checkbox you promise to bring the suggested quantity; the
+            organizer may change the quantity on approval, and the smaller value then applies. If you enter an email address, you will be notified of the decision (accepted or
             declined, optionally with a message). The address is used only for this and deleted afterwards.
         </p>
     </div>

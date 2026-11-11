@@ -69,7 +69,7 @@ class PdfExportController
         require_event_owner_access($event);
 
         if (!class_exists('Dompdf\Dompdf')) {
-            flash('error', 'PDF-Export nicht verfügbar (Composer-Paket dompdf fehlt).');
+            flash('error', __('pdf.unavailable'));
             redirect(base_url('e/' . $adminToken . '/manage'));
         }
 
@@ -97,7 +97,7 @@ class PdfExportController
 
         // Expired events: still allow PDF (user has the link, let them download)
         if (!class_exists('Dompdf\Dompdf')) {
-            flash('error', 'PDF-Export nicht verfügbar (Composer-Paket dompdf fehlt).');
+            flash('error', __('pdf.unavailable'));
             redirect(base_url('g/' . $guestToken));
         }
 

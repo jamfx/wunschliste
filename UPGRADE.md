@@ -11,6 +11,14 @@ Bei jedem Update die Dateien der neuen Version über die bestehende Installation
 - Prüfe den Ordner `migrations/` auf dem Server: Er darf nur Dateien der aktuellen Version enthalten (plus die `.htaccess`). Dateien, die nicht dazugehören – etwa Reste früherer Entwicklungsstände –, werden vom Migrator als „ausstehend“ angezeigt. In diesem Fall **nicht** ausführen, sondern die Dateien löschen.
 - Migrationsdateien niemals umbenennen: eine umbenannte Datei gilt als neu und würde erneut ausgeführt.
 
+## Upgrade auf 1.3.0 (Zusage bei Vorschlägen, übersetzte Texte)
+
+Alle Dateien der neuen Version über die bestehende Installation kopieren (Ordner `vendor/` und `migrations/` vollständig, nur Dateien dieser Version), danach als SuperAdmin unter **Admin → Datenbank-Update** die Migration `004_suggester_claim.sql` einspielen (der Hinweis erscheint auf dem Dashboard). Wichtig: Spiele die Migration direkt nach dem Hochladen ein – solange sie fehlt, schlägt das Absenden eines Vorschlags **mit gesetztem Häkchen „Ich bringe das auch mit“** fehl.
+
+Neu für Organisatoren: Mails an dich (Übernahme, Liste vollständig, neuer Vorschlag) und Cron-Mails kommen jetzt in der **Standardsprache der Seite** (vorher immer Deutsch). Einzelne Übernahmen lassen sich in der Verwaltung mit dem × entfernen.
+
+---
+
 ## Upgrade auf 1.2.0 (Vorschlags-Benachrichtigung, Spam-Schutz, Datenbank-Update)
 
 Neue Funktion: Gäste können bei Mitbringsel-Vorschlägen optional Anzahl und E-Mail-Adresse angeben und werden über die Entscheidung benachrichtigt. Nach dem Hochladen der Dateien als SuperAdmin einloggen und unter **Admin → Datenbank-Update** auf „Migrationen jetzt ausführen“ klicken (vorher ein Datenbank-Backup anlegen). Auf dem Dashboard weist ein Hinweis darauf hin, solange Migrationen ausstehen. Die SQL-Dateien müssen dafür nicht mehr von Hand eingespielt werden (die manuelle Variante per phpMyAdmin/`mysql` bleibt aber möglich, solange du danach nicht zusätzlich den Knopf drückst – der Migrator erkennt den Stand aus dem Schema). Neuinstallationen brauchen nichts zu tun.
@@ -85,6 +93,14 @@ For every update, copy the files of the new version over the existing installati
 - Not all SQL steps are re-run on every update. Each migration file runs exactly once and is recorded in the `migrations` table; only files that are new are pending.
 - Check the `migrations/` folder on the server: it must contain only files of the current version (plus the `.htaccess`). Files that do not belong there – e.g. leftovers from earlier development states – are shown as "pending" by the migrator. In that case do **not** run them; delete the files instead.
 - Never rename migration files: a renamed file counts as new and would be run again.
+
+## Upgrading to 1.3.0 (pledges on suggestions, translated texts)
+
+Copy all files of the new version over the existing installation (`vendor/` and `migrations/` complete, only files of this version), then, as SuperAdmin, apply the migration `004_suggester_claim.sql` under **Admin → Database update** (a notice appears on the dashboard). Important: apply the migration right after uploading – until then, submitting a suggestion **with the "I will bring this too" box ticked** fails.
+
+New for organisers: emails to you (claimed, list complete, new suggestion) and cron emails are now sent in the **site's default language** (previously always German). Single claims can be removed in the management page with the ×.
+
+---
 
 ## Upgrading to 1.2.0 (suggestion notifications, spam protection, database update)
 

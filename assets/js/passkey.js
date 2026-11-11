@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var CSRF       = cfg.dataset.csrf;
     var API_URL    = cfg.dataset.apiUrl;
     var cpySuccess = cfg.dataset.copySuccess || 'Kopiert!';
-    var notSupported = cfg.dataset.notSupported || 'Passkeys werden von deinem Browser nicht unterstützt.';
+    var notSupported = cfg.dataset.notSupported || 'Passkeys are not supported by your browser.';
 
     /* ---- Recovery codes copy / download ---- */
     var codesGrid = document.getElementById('new-codes-grid');
@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 window.location.href = res.redirect;
             } else {
                 if (btnAdd) btnAdd.disabled = false;
-                showError(res.error || 'Registrierung fehlgeschlagen.');
+                showError(res.error || cfg.dataset.registerFailed || 'Registration failed.');
             }
         }).catch(function (err) {
             if (btnAdd) btnAdd.disabled = false;
@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var CSRF     = cfg.dataset.csrf;
     var AUTH_URL = cfg.dataset.authUrl;
-    var notSupported = cfg.dataset.notSupported || 'Passkeys werden von deinem Browser nicht unterstützt.';
+    var notSupported = cfg.dataset.notSupported || 'Passkeys are not supported by your browser.';
 
     var btn   = document.getElementById('btn-passkey-auth');
     var errEl = document.getElementById('passkey-auth-error');
@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 window.location.href = res.redirect;
             } else {
                 btn.disabled = false;
-                throw new Error((res && res.error) || 'Authentifizierung fehlgeschlagen.');
+                throw new Error((res && res.error) || cfg.dataset.authFailed || 'Authentication failed.');
             }
         }).catch(function (err) {
             btn.disabled = false;

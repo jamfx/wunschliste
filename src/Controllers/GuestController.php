@@ -277,6 +277,7 @@ class GuestController
         $guestName  = trim($_POST['guest_name'] ?? '');
         $quantity   = (int) ($_POST['quantity'] ?? 1);
         $email      = trim($_POST['suggester_email'] ?? '');
+        $brings     = !empty($_POST['suggester_brings']);
 
         if ($name === '') {
             flash('error', __('validation.required') . ' (' . __('guest.suggest_name') . ')');
@@ -309,7 +310,7 @@ class GuestController
         );
         $sortOrder = (int) ($maxOrder['max_order'] ?? 0) + 1;
 
-        $db->insert('items', [
+        $row = [
             'event_id'           => $event['id'],
             'name'               => $name,
             'quantity'           => $quantity,
@@ -319,7 +320,12 @@ class GuestController
             // Only kept until the organiser decides, see ItemController.
             'suggester_email'    => $email !== '' ? $email : null,
             'suggester_locale'   => $email !== '' ? $GLOBALS['translator']->getLocale() : null,
-        ]);
+        ];
+        if ($brings) {
+            // Pledge: turned into a claim of min(pledge, final quantity) on approval.
+            $row['suggester_brings_qty'] = $quantity;
+        }
+        $db->insert('items', $row);
 
         rate_limit_record('suggest');
 
@@ -334,7 +340,7 @@ class GuestController
             ]);
             @$mailer->send(
                 $event['creator_email'],
-                'Neuer Vorschlag: ' . $name,
+                mail_translator()->t('mail.suggested_subject', ['name' => $name]),
                 $html
             );
         }
@@ -414,7 +420,7 @@ class GuestController
             ]);
             @$mailer->send(
                 $event['creator_email'],
-                $claim['guest_name'] . ' hat die Übernahme von ' . $item['name'] . ' zurückgezogen',
+                mail_translator()->t('mail.withdrawn_subject', ['guest' => $claim['guest_name'], 'item' => $item['name']]),
                 $html
             );
         }

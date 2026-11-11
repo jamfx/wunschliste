@@ -26,15 +26,15 @@
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1.5rem;">
             <div class="card" style="text-align:center;padding:1rem;">
                 <div style="font-size:2rem;font-weight:700;color:var(--primary-color);"><?= $totalEvents ?></div>
-                <div class="text-muted text-sm">Events gesamt</div>
+                <div class="text-muted text-sm"><?= h(__('admin.stat_total')) ?></div>
             </div>
             <div class="card" style="text-align:center;padding:1rem;">
                 <div style="font-size:2rem;font-weight:700;color:var(--success);"><?= $activeEvents ?></div>
-                <div class="text-muted text-sm">Aktiv</div>
+                <div class="text-muted text-sm"><?= h(__('common.active')) ?></div>
             </div>
             <div class="card" style="text-align:center;padding:1rem;">
                 <div style="font-size:2rem;font-weight:700;color:var(--text-muted);"><?= $expiredEvents ?></div>
-                <div class="text-muted text-sm">Abgelaufen</div>
+                <div class="text-muted text-sm"><?= h(__('common.expired')) ?></div>
             </div>
         </div>
 
@@ -42,13 +42,13 @@
         <div style="display:flex;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap;">
             <a href="<?= h(base_url()) ?>" class="btn btn-primary btn-sm" target="_blank" rel="noopener">
                 <i class="fa-solid fa-plus" aria-hidden="true"></i>
-                Neues Event (öffnet Website)
+                <?= h(__('admin.new_event_opens_site')) ?>
             </a>
             <form method="post" action="<?= h(base_url('admin/cleanup')) ?>" style="display:inline;">
                 <?= csrf_field() ?>
                 <button type="submit" class="btn btn-secondary btn-sm">
                     <i class="fa-solid fa-broom" aria-hidden="true"></i>
-                    Abgelaufene jetzt löschen
+                    <?= h(__('admin.delete_expired_now')) ?>
                 </button>
             </form>
         </div>
@@ -56,21 +56,21 @@
         <?php if (empty($events)): ?>
         <div class="card" style="text-align:center;padding:3rem;color:var(--text-muted);">
             <i class="fa-solid fa-calendar-xmark" aria-hidden="true" style="font-size:2rem;display:block;margin-bottom:.75rem;"></i>
-            Noch keine Events vorhanden.
+            <?= h(__('admin.no_events')) ?>
         </div>
         <?php else: ?>
         <div class="table-wrap">
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Titel</th>
-                        <th>Besitzer</th>
-                        <th>Datum</th>
+                        <th><?= h(__('admin.col_title')) ?></th>
+                        <th><?= h(__('admin.col_owner')) ?></th>
+                        <th><?= h(__('admin.col_date')) ?></th>
                         <th><?= h(__('admin.items_column')) ?></th>
-                        <th>Fortschritt</th>
-                        <th>Status</th>
-                        <th>Erstellt</th>
-                        <th>Aktionen</th>
+                        <th><?= h(__('admin.col_progress')) ?></th>
+                        <th><?= h(__('admin.col_status')) ?></th>
+                        <th><?= h(__('admin.col_created')) ?></th>
+                        <th><?= h(__('admin.col_actions')) ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -86,7 +86,7 @@
                         <?= !empty($event['owner_email']) ? h($event['owner_email']) : '— (Token-only)' ?>
                     </td>
                     <td class="text-sm text-muted">
-                        <?= !empty($event['event_date']) ? h(date('d.m.Y', strtotime($event['event_date']))) : '—' ?>
+                        <?= !empty($event['event_date']) ? h(format_date($event['event_date'])) : '—' ?>
                     </td>
                     <td class="text-sm">
                         <?= (int) $event['claimed_count'] ?>/<?= (int) $event['item_count'] ?>
@@ -101,13 +101,13 @@
                     </td>
                     <td>
                         <?php if ($event['is_expired']): ?>
-                        <span class="badge badge-neutral">Abgelaufen</span>
+                        <span class="badge badge-neutral"><?= h(__('common.expired')) ?></span>
                         <?php else: ?>
-                        <span class="badge badge-claimed">Aktiv</span>
+                        <span class="badge badge-claimed"><?= h(__('common.active')) ?></span>
                         <?php endif; ?>
                     </td>
                     <td class="text-sm text-muted">
-                        <?= h(date('d.m.Y', strtotime($event['created_at']))) ?>
+                        <?= h(format_date($event['created_at'])) ?>
                     </td>
                     <td>
                         <div style="display:flex;gap:.375rem;flex-wrap:wrap;">

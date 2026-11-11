@@ -10,7 +10,7 @@ if (!defined('CONFIG_PATH')) {
 }
 
 // Bump on every release (see UPGRADE.md); shown in the public footer.
-define('APP_VERSION', '1.2.0');
+define('APP_VERSION', '1.3.0');
 
 // Gift Mode (Geschenkmodus) tuning constants
 define('GIFT_MODE_HEARTBEAT_INTERVAL_MS', 30000);  // JS heartbeat interval
@@ -289,6 +289,42 @@ function md(string $text): string
     return $out;
 }
 
+/** Site default language (site_settings.default_language), validated against lang/*.json, fallback 'de'. */
+function site_default_language(): string
+{
+    global $db;
+    static $cached = null;
+    if ($cached !== null) {
+        return $cached;
+    }
+    $cached = 'de';
+    if ($db !== null) {
+        try {
+            $row = $db->fetch("SELECT setting_value FROM site_settings WHERE setting_key = 'default_language' LIMIT 1");
+            if ($row && isset(available_languages()[$row['setting_value']])) {
+                $cached = $row['setting_value'];
+            }
+        } catch (PDOException) {
+            // keep fallback
+        }
+    }
+    return $cached;
+}
+
+/**
+ * Translator for outgoing e-mails. Mails that are not sent in the context of the
+ * recipient's own browser session (organiser notifications, cron mails) have no
+ * language of their own, so they use the site default language; pass a locale
+ * (e.g. the requester's current one) where it is known.
+ */
+function mail_translator(?string $locale = null): Translator
+{
+    if ($locale === null || !isset(available_languages()[$locale])) {
+        $locale = site_default_language();
+    }
+    return new Translator($locale);
+}
+
 function csrf_field(): string
 {
     return '<input type="hidden" name="csrf_token" value="' . h($_SESSION['csrf_token']) . '">';
@@ -504,7 +540,7 @@ function require_event_owner_access(array $event): void
         return;
     }
     $_SESSION['login_redirect'] = current_url();
-    flash('error', 'Bitte einloggen, um diese Liste zu verwalten.');
+    flash('error', __('auth.login_required_manage'));
     redirect(base_url('admin/login'));
 }
 
@@ -572,14 +608,19 @@ function claim_finalize_delay_seconds(): int
     return $cached;
 }
 
+/** Format a date string in the current language's date format (lang key "format.date"). */
+function format_date(string $date): string
+{
+    return date(__('format.date'), strtotime($date));
+}
+
 /** Browser-tab title for an event page: "Titel am TT.MM.JJJJ" (date omitted if unset). */
 function event_page_title(array $event): string
 {
-    $title = $event['title'];
-    if (!empty($event['event_date'])) {
-        $title .= ' am ' . date('d.m.Y', strtotime($event['event_date']));
+    if (empty($event['event_date'])) {
+        return $event['title'];
     }
-    return $title;
+    return __('event.page_title_dated', ['title' => $event['title'], 'date' => format_date($event['event_date'])]);
 }
 
 /** Whether the current browser session has unlocked this event's optional access password. */
@@ -671,7 +712,7 @@ function gift_mode_send_coordination_emails(array $event, array $item): void
         'guestUrl'         => base_url('g/' . $event['guest_token']),
         'primaryColor'     => primary_color(),
     ]);
-    $subject = 'Geschenk-Koordination: ' . $item['name'];
+    $subject = mail_translator()->t('mail.gift_subject', ['item' => $item['name']]);
 
     foreach ($pending as $claim) {
         $ok = @$mailer->send($claim['notification_email'], $subject, $html);
@@ -799,7 +840,7 @@ function process_due_claim_notifications(int $limit = 25): void
                 ]);
                 @$mailer->send(
                     $event['creator_email'],
-                    $claim['guest_name'] . ' bringt ' . $item['name'] . ' zu ' . $event['title'] . ' mit',
+                    mail_translator()->t('mail.claimed_subject', ['guest' => $claim['guest_name'], 'item' => $item['name'], 'event' => $event['title']]),
                     $html
                 );
             }
@@ -822,7 +863,7 @@ function process_due_claim_notifications(int $limit = 25): void
                 ]);
                 @$mailer->send(
                     $event['creator_email'],
-                    'Liste vollständig: ' . $event['title'],
+                    mail_translator()->t('mail.complete_subject', ['event' => $event['title']]),
                     $html
                 );
             }

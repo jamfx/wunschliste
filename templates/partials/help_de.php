@@ -309,7 +309,9 @@
         <p style="margin-bottom:0;">
             Falls der Eventersteller es erlaubt hat, kann am Ende der Liste ein neues Mitbringsel vorgeschlagen
             werden (Name + eigener Name, optional Anzahl). Der Vorschlag erscheint erst in der öffentlichen Liste,
-            nachdem der Eventersteller ihn freigegeben hat. Wer eine E-Mail-Adresse angibt, wird über die
+            nachdem der Eventersteller ihn freigegeben hat. Mit dem Kästchen „Ich bringe das auch mit“ sagst du zu, die
+            vorgeschlagene Menge mitzubringen; der Eventersteller kann die Menge bei der Freigabe ändern, es
+            zählt dann der kleinere Wert. Wer eine E-Mail-Adresse angibt, wird über die
             Entscheidung (Annahme oder Ablehnung, ggf. mit Mitteilung) benachrichtigt. Die Adresse wird nur dafür
             verwendet und danach gelöscht.
         </p>

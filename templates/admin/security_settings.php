@@ -20,12 +20,10 @@
         <div class="card" style="margin-top:1.5rem;">
             <h2 style="font-size:1rem;margin-bottom:.375rem;">
                 <i class="fa-solid fa-list-check" aria-hidden="true" style="color:var(--primary-color);"></i>
-                Listen-Erstellung
+                <?= h(__('admin.listmode_title')) ?>
             </h2>
             <p class="text-muted text-sm" style="margin-bottom:1.25rem;">
-                Legt fest, wer neue Listen erstellen darf. Bereits bestehende Listen sind davon nicht betroffen —
-                ohne Besitzer bleiben sie wie bisher allein über den Admin-Link verwaltbar, mit Besitzer braucht
-                die Verwaltung weiterhin dessen Login.
+                <?= h(__('admin.listmode_desc')) ?>
             </p>
 
             <form method="post" action="<?= h(base_url('admin/settings/security')) ?>">
@@ -38,8 +36,8 @@
                                style="margin-top:.2rem;"
                                <?= $listCreationMode === 'open' ? 'checked' : '' ?>>
                         <span>
-                            <strong>Offen für alle</strong><br>
-                            <span class="text-muted text-sm">Jeder mit Zugriff auf die Seite kann ohne Login eine neue Liste erstellen (bisheriges Verhalten).</span>
+                            <strong><?= h(__('admin.listmode_open')) ?></strong><br>
+                            <span class="text-muted text-sm"><?= h(__('admin.listmode_open_desc')) ?></span>
                         </span>
                     </label>
                     <label style="display:flex;align-items:flex-start;gap:.6rem;cursor:pointer;">
@@ -47,8 +45,8 @@
                                style="margin-top:.2rem;"
                                <?= $listCreationMode === 'restricted' ? 'checked' : '' ?>>
                         <span>
-                            <strong>Nur für registrierte User</strong><br>
-                            <span class="text-muted text-sm">Eine neue Liste erstellen kann nur, wer eingeloggt ist. Die Liste gehört dann diesem Account.</span>
+                            <strong><?= h(__('admin.listmode_restricted')) ?></strong><br>
+                            <span class="text-muted text-sm"><?= h(__('admin.listmode_restricted_desc')) ?></span>
                         </span>
                     </label>
                 </div>

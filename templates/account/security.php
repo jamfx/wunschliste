@@ -25,7 +25,7 @@ $backUrl = base_url(($_SESSION['user_role'] ?? '') === 'superadmin' ? 'admin/das
 
     <h1 style="font-size:1.5rem;margin-bottom:1.5rem;">
         <i class="fa-solid fa-shield-halved" aria-hidden="true" style="color:var(--primary-color);"></i>
-        Meine Sicherheit
+        <?= h(__('admin.account_security')) ?>
     </h1>
 
     <!-- Config element for passkey.js (no inline JS, CSP-compliant) -->
@@ -33,7 +33,8 @@ $backUrl = base_url(($_SESSION['user_role'] ?? '') === 'superadmin' ? 'admin/das
          data-csrf="<?= h($_SESSION['csrf_token']) ?>"
          data-api-url="<?= h(base_url('account/security/2fa/passkey')) ?>"
          data-copy-success="<?= h(__('admin.recovery_copy_success')) ?>"
-         data-not-supported="<?= h(__('admin.passkey_not_supported')) ?>">
+         data-not-supported="<?= h(__('admin.passkey_not_supported')) ?>"
+         data-register-failed="<?= h(__('security.passkey_register_failed')) ?>">
     </div>
 
     <?php if (!empty($pendingPasskeyConfirm) && !empty($recoveryCodes)): ?>
@@ -46,13 +47,13 @@ $backUrl = base_url(($_SESSION['user_role'] ?? '') === 'superadmin' ? 'admin/das
                style="font-size:2rem;color:var(--warning,#f59e0b);"></i>
             <h2 style="font-size:1rem;margin:.5rem 0 .25rem;"><?= h(__('admin.recovery_new_title')) ?></h2>
             <p class="text-muted text-sm">
-                Dein Passkey wird erst gespeichert, nachdem du die Notfallcodes gesichert hast.
+                <?= h(__('security.passkey_pending_note')) ?>
             </p>
         </div>
 
         <div class="alert alert-warning" style="margin-bottom:1rem;">
             <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-            <strong>Wichtig:</strong> <?= h(__('admin.recovery_new_hint')) ?>
+            <strong><?= h(__('security.important')) ?></strong> <?= h(__('admin.recovery_new_hint')) ?>
         </div>
 
         <div id="new-codes-grid"
@@ -83,18 +84,17 @@ $backUrl = base_url(($_SESSION['user_role'] ?? '') === 'superadmin' ? 'admin/das
                 <input type="checkbox" name="confirmed" value="1" required
                        style="margin-top:.2rem;width:1rem;height:1rem;flex-shrink:0;">
                 <span class="text-sm">
-                    Ich habe die Notfallcodes sicher gespeichert und verstehe,
-                    dass sie nur einmal angezeigt werden.
+                    <?= h(__('security.recovery_confirm_label')) ?>
                 </span>
             </label>
             <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
                 <button type="submit" class="btn btn-primary">
                     <i class="fa-solid fa-check" aria-hidden="true"></i>
-                    Passkey speichern
+                    <?= h(__('security.passkey_save')) ?>
                 </button>
                 <button type="submit" form="form-cancel-passkey" class="btn btn-secondary">
                     <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-                    Abbrechen
+                    <?= h(__('common.cancel')) ?>
                 </button>
             </div>
         </form>
@@ -114,14 +114,13 @@ $backUrl = base_url(($_SESSION['user_role'] ?? '') === 'superadmin' ? 'admin/das
                style="font-size:2rem;color:var(--warning,#f59e0b);"></i>
             <h2 style="font-size:1rem;margin:.5rem 0 .25rem;"><?= h(__('admin.recovery_new_title')) ?></h2>
             <p class="text-muted text-sm">
-                TOTP wird erst aktiviert, nachdem du die Notfallcodes gesichert
-                und mit einem Code aus deiner App bestätigt hast.
+                <?= h(__('security.totp_pending_note')) ?>
             </p>
         </div>
 
         <div class="alert alert-warning" style="margin-bottom:1rem;">
             <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-            <strong>Wichtig:</strong> <?= h(__('admin.recovery_new_hint')) ?>
+            <strong><?= h(__('security.important')) ?></strong> <?= h(__('admin.recovery_new_hint')) ?>
         </div>
 
         <div id="new-codes-grid"
@@ -152,8 +151,7 @@ $backUrl = base_url(($_SESSION['user_role'] ?? '') === 'superadmin' ? 'admin/das
                 <input type="checkbox" name="confirmed" value="1" required
                        style="margin-top:.2rem;width:1rem;height:1rem;flex-shrink:0;">
                 <span class="text-sm">
-                    Ich habe die Notfallcodes sicher gespeichert und verstehe,
-                    dass sie nur einmal angezeigt werden.
+                    <?= h(__('security.recovery_confirm_label')) ?>
                 </span>
             </label>
             <div class="form-group">
@@ -165,16 +163,16 @@ $backUrl = base_url(($_SESSION['user_role'] ?? '') === 'superadmin' ? 'admin/das
                        required
                        placeholder="000000"
                        style="width:10rem;text-align:center;letter-spacing:.25em;font-size:1.25rem;">
-                <p class="form-hint">Gib den 6-stelligen Code aus deiner Authenticator-App ein, um die Einrichtung abzuschließen.</p>
+                <p class="form-hint"><?= h(__('security.totp_confirm_hint')) ?></p>
             </div>
             <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
                 <button type="submit" class="btn btn-primary">
                     <i class="fa-solid fa-check" aria-hidden="true"></i>
-                    Bestätigen und aktivieren
+                    <?= h(__('security.confirm_and_activate')) ?>
                 </button>
                 <button type="submit" form="form-cancel-totp" class="btn btn-secondary">
                     <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-                    Abbrechen
+                    <?= h(__('common.cancel')) ?>
                 </button>
             </div>
         </form>
@@ -214,7 +212,7 @@ $backUrl = base_url(($_SESSION['user_role'] ?? '') === 'superadmin' ? 'admin/das
             </button>
         </div>
         <p class="text-muted text-sm">
-            Jeder Code kann nur einmal verwendet werden. Verbrauchte Codes werden automatisch entfernt.
+            <?= h(__('security.recovery_single_use')) ?>
         </p>
     </div>
     <?php endif; ?>
@@ -225,30 +223,30 @@ $backUrl = base_url(($_SESSION['user_role'] ?? '') === 'superadmin' ? 'admin/das
     <div class="card" style="margin-bottom:1.5rem;">
         <h2 style="font-size:1rem;margin-bottom:1rem;">
             <i class="fa-solid fa-mobile-screen-button" aria-hidden="true" style="color:var(--primary-color);margin-right:.4em;"></i>
-            TOTP-Authentifizierung
+            <?= h(__('security.totp_heading')) ?>
         </h2>
 
         <?php if ($admin['totp_enabled']): ?>
         <div class="alert alert-success" style="margin-bottom:1rem;">
             <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
-            <strong>TOTP ist aktiv.</strong>
-            Bei jedem Login wirst du nach einem 6-stelligen Code gefragt.
+            <strong><?= h(__('security.totp_active')) ?></strong>
+            <?= h(__('security.totp_active_hint')) ?>
         </div>
 
         <details>
             <summary style="cursor:pointer;color:var(--danger);font-size:.9375rem;font-weight:600;">
                 <i class="fa-solid fa-shield-xmark" aria-hidden="true"></i>
-                TOTP deaktivieren
+                <?= h(__('security.totp_disable')) ?>
             </summary>
             <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);">
                 <?php if (!empty($passkeys)): ?>
                 <p class="text-muted text-sm" style="margin-bottom:.875rem;">
                     <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-                    Deine Passkeys und Notfallcodes bleiben erhalten.
+                    <?= h(__('security.keep_passkeys_note')) ?>
                 </p>
                 <?php else: ?>
                 <p class="text-muted text-sm" style="margin-bottom:.875rem;">
-                    Bestätige mit deinem Passwort um TOTP zu deaktivieren.
+                    <?= h(__('security.confirm_with_password')) ?>
                 </p>
                 <?php endif; ?>
                 <form method="post" action="<?= h(base_url('account/security/2fa/disable')) ?>">
@@ -259,9 +257,9 @@ $backUrl = base_url(($_SESSION['user_role'] ?? '') === 'superadmin' ? 'admin/das
                                autocomplete="current-password" required>
                     </div>
                     <button type="submit" class="btn btn-danger"
-                            data-confirm="TOTP wirklich deaktivieren? Dein Account wird weniger sicher.">
+                            data-confirm="<?= h(__('security.totp_disable_confirm')) ?>">
                         <i class="fa-solid fa-shield-xmark" aria-hidden="true"></i>
-                        TOTP deaktivieren
+                        <?= h(__('security.totp_disable')) ?>
                     </button>
                 </form>
             </div>
@@ -270,13 +268,12 @@ $backUrl = base_url(($_SESSION['user_role'] ?? '') === 'superadmin' ? 'admin/das
         <?php elseif (!empty($pendingTotpConfirm)): ?>
         <div class="alert alert-warning" style="margin-bottom:0;">
             <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-            Schließe die Einrichtung oben ab, um TOTP zu aktivieren.
+            <?= h(__('security.finish_setup_above')) ?>
         </div>
 
         <?php else: ?>
         <p class="text-muted text-sm" style="margin-bottom:.875rem;">
-            Scanne den QR-Code mit einer Authenticator-App (z.B. Google Authenticator,
-            Authy, Bitwarden) und klicke dann auf "TOTP aktivieren".
+            <?= h(__('security.scan_qr')) ?>
         </p>
 
         <?php if ($qrSvg): ?>
@@ -288,14 +285,13 @@ $backUrl = base_url(($_SESSION['user_role'] ?? '') === 'superadmin' ? 'admin/das
         <?php else: ?>
         <div class="alert alert-warning" style="margin-bottom:1.25rem;">
             <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-            QR-Code konnte nicht gerendert werden.
-            Composer-Paket <code>endroid/qr-code</code> prüfen.
+            <?= __('security.qr_failed', ['package' => '<code>endroid/qr-code</code>']) ?>
         </div>
         <?php endif; ?>
 
         <?php if ($pendingSecret): ?>
         <div class="form-group" style="margin-bottom:1.25rem;">
-            <label class="form-label">Manueller Schlüssel (Base32)</label>
+            <label class="form-label"><?= h(__('security.manual_key')) ?></label>
             <div style="display:flex;align-items:center;gap:.5rem;">
                 <input type="text" class="form-input" readonly
                        value="<?= h(implode(' ', str_split($pendingSecret, 4))) ?>"
@@ -314,7 +310,7 @@ $backUrl = base_url(($_SESSION['user_role'] ?? '') === 'superadmin' ? 'admin/das
             <?= csrf_field() ?>
             <button type="submit" class="btn btn-primary">
                 <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
-                TOTP aktivieren
+                <?= h(__('security.totp_enable')) ?>
             </button>
         </form>
         <?php endif; ?>
@@ -358,7 +354,7 @@ $backUrl = base_url(($_SESSION['user_role'] ?? '') === 'superadmin' ? 'admin/das
                             style="color:var(--danger);border-color:var(--danger);"
                             data-confirm="<?= h(__('admin.passkey_delete_confirm', ['name' => $pk['device_name']])) ?>">
                         <i class="fa-solid fa-trash" aria-hidden="true"></i>
-                        Löschen
+                        <?= h(__('common.delete')) ?>
                     </button>
                 </form>
             </li>
@@ -420,8 +416,7 @@ $backUrl = base_url(($_SESSION['user_role'] ?? '') === 'superadmin' ? 'admin/das
             </button>
         </form>
         <p class="text-muted text-sm" style="margin-top:.75rem;">
-            Notfallcodes können anstelle von TOTP oder Passkey verwendet werden.
-            Jeder Code ist nur einmal gültig.
+            <?= h(__('security.recovery_usage_note')) ?>
         </p>
         <?php endif; ?>
     </div>

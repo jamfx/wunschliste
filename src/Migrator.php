@@ -85,7 +85,7 @@ final class Migrator
         $locked   = (int) $lockStmt->fetchColumn();
         $lockStmt->closeCursor();
         if ($locked !== 1) {
-            throw new RuntimeException('Es läuft bereits eine andere Migration. Bitte kurz warten und erneut versuchen.');
+            throw new RuntimeException(__('admin.db_locked'));
         }
 
         $results = [];

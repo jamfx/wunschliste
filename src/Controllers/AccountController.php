@@ -34,10 +34,10 @@ class AccountController
     private function validatePassword(string $password, string $confirm): ?string
     {
         if (strlen($password) < 8) {
-            return 'Das Passwort muss mindestens 8 Zeichen lang sein.';
+            return __('validation.password_min_8');
         }
         if ($password !== $confirm) {
-            return 'Die Passwörter stimmen nicht überein.';
+            return __('validation.password_mismatch');
         }
         return null;
     }
@@ -52,14 +52,14 @@ class AccountController
         $invite = $this->findValidInvite($params['token'] ?? '');
         if (!$invite) {
             render('account/link_invalid', [
-                'pageTitle' => 'Einladung ungültig',
-                'message'   => 'Diese Einladung ist ungültig oder abgelaufen. Bitte bei der einladenden Person eine neue Einladung anfordern.',
+                'pageTitle' => __('account.invite_invalid_title'),
+                'message'   => __('account.invite_invalid_message'),
             ]);
             return;
         }
 
         render('account/accept_invite', [
-            'pageTitle' => 'Account einrichten',
+            'pageTitle' => __('account.setup_title'),
             'email'     => $invite['email'],
             'token'     => $params['token'],
         ]);
@@ -76,8 +76,8 @@ class AccountController
         $invite = $this->findValidInvite($token);
         if (!$invite) {
             render('account/link_invalid', [
-                'pageTitle' => 'Einladung ungültig',
-                'message'   => 'Diese Einladung ist ungültig oder abgelaufen. Bitte bei der einladenden Person eine neue Einladung anfordern.',
+                'pageTitle' => __('account.invite_invalid_title'),
+                'message'   => __('account.invite_invalid_message'),
             ]);
             return;
         }
@@ -94,7 +94,7 @@ class AccountController
         ], ['id' => $invite['user_id']]);
         $db->update('user_invites', ['used_at' => date('Y-m-d H:i:s')], ['id' => $invite['id']]);
 
-        flash('success', 'Account eingerichtet! Du kannst dich jetzt einloggen.');
+        flash('success', __('account.setup_done'));
         redirect(base_url('admin/login'));
     }
 
@@ -105,7 +105,7 @@ class AccountController
     /** GET /forgot-password */
     public function forgotPasswordForm(array $params = []): void
     {
-        render('account/forgot_password', ['pageTitle' => 'Passwort vergessen']);
+        render('account/forgot_password', ['pageTitle' => __('account.forgot_title')]);
     }
 
     /** POST /forgot-password */
@@ -116,7 +116,7 @@ class AccountController
         }
 
         if (!rate_limit_check('password_reset_request', 5, 900)) {
-            flash('error', 'Zu viele Anfragen. Bitte in ein paar Minuten erneut versuchen.');
+            flash('error', __('validation.rate_limit'));
             redirect(base_url('forgot-password'));
         }
         rate_limit_record('password_reset_request');
@@ -142,13 +142,13 @@ class AccountController
             $mailer        = new Mailer($emailSettings);
             $html          = Mailer::renderTemplate('password_reset', [
                 'resetUrl' => base_url('reset-password/' . $token),
-            ]);
-            @$mailer->send($email, 'Passwort zurücksetzen – ' . site_title(), $html);
+            ], $GLOBALS['translator']->getLocale());
+            @$mailer->send($email, __('mail.password_reset_subject', ['site' => site_title()]), $html);
         }
 
         // Same message regardless of whether the account exists, to avoid
         // leaking which email addresses have one.
-        flash('success', 'Falls ein Account mit dieser E-Mail-Adresse existiert, wurde eine E-Mail mit weiteren Schritten versendet.');
+        flash('success', __('account.reset_requested'));
         redirect(base_url('admin/login'));
     }
 
@@ -162,14 +162,14 @@ class AccountController
         $reset = $this->findValidReset($params['token'] ?? '');
         if (!$reset) {
             render('account/link_invalid', [
-                'pageTitle' => 'Link ungültig',
-                'message'   => 'Dieser Link ist ungültig oder abgelaufen. Fordere einen neuen an.',
+                'pageTitle' => __('account.link_invalid_title'),
+                'message'   => __('account.link_invalid_message'),
             ]);
             return;
         }
 
         render('account/reset_password', [
-            'pageTitle' => 'Neues Passwort festlegen',
+            'pageTitle' => __('account.reset_title'),
             'token'     => $params['token'],
         ]);
     }
@@ -185,8 +185,8 @@ class AccountController
         $reset = $this->findValidReset($token);
         if (!$reset) {
             render('account/link_invalid', [
-                'pageTitle' => 'Link ungültig',
-                'message'   => 'Dieser Link ist ungültig oder abgelaufen. Fordere einen neuen an.',
+                'pageTitle' => __('account.link_invalid_title'),
+                'message'   => __('account.link_invalid_message'),
             ]);
             return;
         }
@@ -203,7 +203,7 @@ class AccountController
         ], ['id' => $reset['user_id']]);
         $db->update('password_resets', ['used_at' => date('Y-m-d H:i:s')], ['id' => $reset['id']]);
 
-        flash('success', 'Passwort wurde geändert. Du kannst dich jetzt einloggen.');
+        flash('success', __('account.password_changed'));
         redirect(base_url('admin/login'));
     }
 }

@@ -357,8 +357,15 @@ class Mailer
      * Render a template from templates/emails/{$name}.php and return HTML string.
      * $vars are extracted into the template scope.
      */
-    public static function renderTemplate(string $name, array $vars = []): string
+    public static function renderTemplate(string $name, array $vars = [], ?string $locale = null): string
     {
+        // Templates get $t(key, replacements) and $locale; a caller-provided $t wins.
+        $tr    = mail_translator($locale);
+        $vars += [
+            't'      => static fn(string $key, array $r = []): string => $tr->t($key, $r),
+            'locale' => $tr->getLocale(),
+        ];
+
         return (static function (string $__path, array $__vars): string {
             extract($__vars);
             ob_start();

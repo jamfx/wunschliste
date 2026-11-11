@@ -7,7 +7,7 @@ class InstallController
     public function index(array $params = []): void
     {
         if (file_exists(CONFIG_PATH)) {
-            flash('error', 'Die Anwendung ist bereits installiert.');
+            flash('error', __('install.already_installed'));
             redirect(base_url('admin/login'));
         }
         redirect(base_url('install.php'));
@@ -16,7 +16,7 @@ class InstallController
     /** GET / — temporary placeholder shown until EventController is implemented (Phase 3) */
     public function placeholder(array $params = []): void
     {
-        $pageTitle = 'Mitbringliste';
+        $pageTitle = __('app.title');
         render('placeholder');
     }
 }

@@ -23,7 +23,7 @@ $licenseUrl   = $s['license_url']   ?? '';
         <form method="post" action="<?= h(base_url('admin/settings/design')) ?>" class="card" style="margin-bottom:1.25rem;">
             <?= csrf_field() ?>
 
-            <h2 style="font-size:1rem;margin-bottom:1rem;">Allgemeines</h2>
+            <h2 style="font-size:1rem;margin-bottom:1rem;"><?= h(__('admin.design_general')) ?></h2>
 
             <div class="form-group">
                 <label class="form-label" for="site_title"><?= h(__('admin.design_site_title')) ?></label>
@@ -58,7 +58,7 @@ $licenseUrl   = $s['license_url']   ?? '';
                     <span class="color-preview" id="colorPreview"
                           style="background:<?= h($primaryColor) ?>;"></span>
                 </div>
-                <p class="form-hint">Dieser Farbwert wird als CSS Custom Property gesetzt.</p>
+                <p class="form-hint"><?= h(__('admin.design_color_hint')) ?></p>
                 <p class="form-hint" id="colorContrastWarning" role="status" hidden
                    style="color:var(--warning);"
                    data-contrast-warning-template="<?= h(__('admin.design_contrast_warning')) ?>"></p>
@@ -69,15 +69,15 @@ $licenseUrl   = $s['license_url']   ?? '';
             <div class="form-group">
                 <label class="form-label" for="legal_imprint"><?= h(__('admin.design_imprint')) ?></label>
                 <textarea class="form-textarea" id="legal_imprint" name="legal_imprint"
-                          rows="6" placeholder="<p>Mein Impressum...</p>"><?= h($imprint) ?></textarea>
-                <p class="form-hint">HTML erlaubt. Leer lassen um den Impressum-Link im Footer auszublenden.</p>
+                          rows="6" placeholder="<?= h(__('admin.design_imprint_placeholder')) ?>"><?= h($imprint) ?></textarea>
+                <p class="form-hint"><?= h(__('admin.design_imprint_hint')) ?></p>
             </div>
 
             <div class="form-group">
                 <label class="form-label" for="legal_privacy"><?= h(__('admin.design_privacy')) ?></label>
                 <textarea class="form-textarea" id="legal_privacy" name="legal_privacy"
-                          rows="6" placeholder="<p>Datenschutzerklärung...</p>"><?= h($privacy) ?></textarea>
-                <p class="form-hint">HTML erlaubt. Leer lassen um den Datenschutz-Link im Footer auszublenden.</p>
+                          rows="6" placeholder="<?= h(__('admin.design_privacy_placeholder')) ?>"><?= h($privacy) ?></textarea>
+                <p class="form-hint"><?= h(__('admin.design_privacy_hint')) ?></p>
             </div>
 
             <hr style="border:none;border-top:1px solid var(--border);margin:1rem 0;">
@@ -108,7 +108,7 @@ $licenseUrl   = $s['license_url']   ?? '';
 
             <?php if (!empty($logoPath)): ?>
             <div style="margin-bottom:1rem;">
-                <p class="text-muted text-sm" style="margin-bottom:.5rem;">Aktuelles Logo:</p>
+                <p class="text-muted text-sm" style="margin-bottom:.5rem;"><?= h(__('admin.design_current_logo')) ?></p>
                 <img src="<?= h(base_url($logoPath)) ?>" alt="Logo"
                      style="max-height:80px;max-width:300px;object-fit:contain;border:1px solid var(--border);border-radius:var(--radius-sm);padding:.5rem;margin-bottom:.75rem;">
                 <br>
@@ -133,15 +133,15 @@ $licenseUrl   = $s['license_url']   ?? '';
                            class="form-input" style="padding:.4rem;">
                 </div>
                 <?php if (!empty($logoPath)): ?>
-                <img id="logoPreview" src="" alt="Vorschau" hidden
+                <img id="logoPreview" src="" alt="<?= h(__('admin.design_preview')) ?>" hidden
                      style="max-height:80px;max-width:300px;object-fit:contain;border:1px solid var(--border);border-radius:var(--radius-sm);padding:.5rem;margin-bottom:.75rem;">
                 <?php else: ?>
-                <img id="logoPreview" src="" alt="Vorschau" hidden
+                <img id="logoPreview" src="" alt="<?= h(__('admin.design_preview')) ?>" hidden
                      style="max-height:80px;max-width:300px;object-fit:contain;border:1px solid var(--border);border-radius:var(--radius-sm);padding:.5rem;margin-bottom:.75rem;">
                 <?php endif; ?>
                 <button type="submit" class="btn btn-secondary">
                     <i class="fa-solid fa-upload" aria-hidden="true"></i>
-                    Logo hochladen
+                    <?= h(__('admin.design_logo_upload_btn')) ?>
                 </button>
             </form>
         </div>

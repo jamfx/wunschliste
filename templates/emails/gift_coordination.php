@@ -6,12 +6,17 @@
  * Variables: $event, $item, $participantNames (array<string>), $guestUrl
  */
 ?>
+<?php
+$e    = static fn($s): string => htmlspecialchars((string) $s, ENT_QUOTES);
+$b    = static fn($s): string => '<strong>' . htmlspecialchars((string) $s, ENT_QUOTES) . '</strong>';
+$date = static fn($d): string => date($t('format.date'), strtotime((string) $d));
+?>
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= $e($locale) ?>">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Geschenk-Koordination: <?= htmlspecialchars($item['name'], ENT_QUOTES) ?></title>
+<title><?= $e($t('mail.gift_subject', ['item' => $item['name']])) ?></title>
 <style>
   body{margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;color:#333}
   .wrap{max-width:560px;margin:32px auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.1)}
@@ -30,37 +35,34 @@
 <body>
 <div class="wrap">
   <div class="head">
-    <h1>&#x1F381; Alle Plätze für "<?= htmlspecialchars($item['name'], ENT_QUOTES) ?>" sind besetzt!</h1>
+    <h1>&#x1F381; <?= $e($t('mail.gift_title', ['item' => $item['name']])) ?></h1>
   </div>
   <div class="body">
-    <p>Gute Nachrichten! Das gemeinsame Mitbringsel
-    <strong><?= htmlspecialchars($item['name'], ENT_QUOTES) ?></strong>
-    für <strong><?= htmlspecialchars($event['title'], ENT_QUOTES) ?></strong>
     <?php if (!empty($event['event_date'])): ?>
-    am <strong><?= htmlspecialchars(date('d.m.Y', strtotime($event['event_date'])), ENT_QUOTES) ?></strong>
+    <p><?= $t('mail.gift_intro_dated', ['item' => $b($item['name']), 'event' => $b($event['title']), 'date' => $b($date($event['event_date']))]) ?></p>
+    <?php else: ?>
+    <p><?= $t('mail.gift_intro', ['item' => $b($item['name']), 'event' => $b($event['title'])]) ?></p>
     <?php endif; ?>
-    ist jetzt vollständig übernommen. Zeit, sich mit den anderen abzustimmen!
-    </p>
 
     <div class="item-box">
-      <p class="item-name">&#x1F4E6; <?= htmlspecialchars($item['name'], ENT_QUOTES) ?></p>
-      <p class="meta">Ihr seid:</p>
+      <p class="item-name">&#x1F4E6; <?= $e($item['name']) ?></p>
+      <p class="meta"><?= $e($t('mail.gift_you_are')) ?></p>
       <ul class="participants">
         <?php foreach ($participantNames as $name): ?>
-        <li><?= htmlspecialchars($name, ENT_QUOTES) ?></li>
+        <li><?= $e($name) ?></li>
         <?php endforeach; ?>
       </ul>
     </div>
 
-    <p class="meta">Sprecht euch am besten direkt untereinander ab, wer was übernimmt.</p>
+    <p class="meta"><?= $e($t('mail.gift_coordinate')) ?></p>
 
-    <a class="link-btn" href="<?= htmlspecialchars($guestUrl, ENT_QUOTES) ?>">
-      Zur Liste
+    <a class="link-btn" href="<?= $e($guestUrl) ?>">
+      <?= $e($t('mail.to_list')) ?>
     </a>
   </div>
   <div class="footer">
-    Diese E-Mail wurde automatisch von <?= htmlspecialchars(site_title(), ENT_QUOTES) ?> gesendet. Deine E-Mail-Adresse
-    wurde ausschließlich für diese Benachrichtigung verwendet und wird nun gelöscht.
+    <?= $e($t('mail.auto_footer', ['site' => site_title()])) ?>
+    <?= $e($t('mail.gift_footer_note')) ?>
   </div>
 </div>
 </body>

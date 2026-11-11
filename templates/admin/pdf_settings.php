@@ -53,7 +53,7 @@ $footerText  = $s['pdf_footer_text'] ?? '';
                 <label class="form-label" for="pdf_footer_text"><?= h(__('pdf.footer_text')) ?></label>
                 <input class="form-input" type="text" id="pdf_footer_text" name="pdf_footer_text"
                        value="<?= h($footerText) ?>" maxlength="255"
-                       placeholder="z.B. Erstellt mit Mitbringliste">
+                       placeholder="<?= h(__('pdf.footer_placeholder')) ?>">
             </div>
 
             <div class="form-check">

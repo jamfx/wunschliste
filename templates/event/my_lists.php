@@ -7,7 +7,7 @@
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.25rem;">
     <h1 style="font-size:1.5rem;margin:0;">
         <i class="fa-solid fa-list-check" aria-hidden="true" style="color:var(--primary-color);"></i>
-        Meine Listen
+        <?= h(__('event.my_lists_title')) ?>
     </h1>
     <div style="display:flex;gap:.5rem;">
         <a href="<?= h(base_url('account/security')) ?>" class="btn btn-secondary btn-sm">
@@ -27,25 +27,25 @@
 <div style="margin-bottom:1.25rem;">
     <a href="<?= h(base_url()) ?>" class="btn btn-primary btn-sm">
         <i class="fa-solid fa-plus" aria-hidden="true"></i>
-        Neue Liste erstellen
+        <?= h(__('event.new_list')) ?>
     </a>
 </div>
 
 <?php if (empty($events)): ?>
 <div class="card" style="text-align:center;padding:3rem;color:var(--text-muted);">
     <i class="fa-solid fa-calendar-xmark" aria-hidden="true" style="font-size:2rem;display:block;margin-bottom:.75rem;"></i>
-    Noch keine eigenen Listen vorhanden.
+    <?= h(__('event.no_own_lists')) ?>
 </div>
 <?php else: ?>
 <div class="table-wrap">
     <table class="table">
         <thead>
             <tr>
-                <th>Titel</th>
-                <th>Datum</th>
-                <th>Fortschritt</th>
-                <th>Status</th>
-                <th>Aktionen</th>
+                <th><?= h(__('admin.col_title')) ?></th>
+                <th><?= h(__('admin.col_date')) ?></th>
+                <th><?= h(__('admin.col_progress')) ?></th>
+                <th><?= h(__('admin.col_status')) ?></th>
+                <th><?= h(__('admin.col_actions')) ?></th>
             </tr>
         </thead>
         <tbody>
@@ -57,7 +57,7 @@
                 </a>
             </td>
             <td class="text-sm text-muted">
-                <?= !empty($event['event_date']) ? h(date('d.m.Y', strtotime($event['event_date']))) : '—' ?>
+                <?= !empty($event['event_date']) ? h(format_date($event['event_date'])) : '—' ?>
             </td>
             <td style="min-width:100px;">
                 <div class="progress-bar-outer" style="height:.5rem;" role="progressbar"
@@ -69,9 +69,9 @@
             </td>
             <td>
                 <?php if ($event['is_expired']): ?>
-                <span class="badge badge-neutral">Abgelaufen</span>
+                <span class="badge badge-neutral"><?= h(__('common.expired')) ?></span>
                 <?php else: ?>
-                <span class="badge badge-claimed">Aktiv</span>
+                <span class="badge badge-claimed"><?= h(__('common.active')) ?></span>
                 <?php endif; ?>
             </td>
             <td>

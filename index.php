@@ -42,6 +42,7 @@ $router->post('/e/{admin_token}/items/{id}/update',          [ItemController::cl
 $router->post('/e/{admin_token}/items/{id}/delete',          [ItemController::class, 'delete']);
 $router->post('/e/{admin_token}/items/{id}/approve',         [ItemController::class, 'approve']);
 $router->post('/e/{admin_token}/items/{id}/reject',          [ItemController::class, 'reject']);
+$router->post('/e/{admin_token}/claims/{id}/delete',          [ItemController::class, 'removeClaim']);
 $router->post('/e/{admin_token}/items/reorder',               [ItemController::class, 'reorder']);
 
 // -----------------------------------------------------------------------

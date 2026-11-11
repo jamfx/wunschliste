@@ -37,7 +37,7 @@ $progressPct = $progressTotal > 0
     <?php if (!empty($event['event_date'])): ?>
     <p class="text-muted text-sm" style="margin-bottom:.375rem;">
         <i class="fa-regular fa-calendar" aria-hidden="true"></i>
-        <?= h(date('d.m.Y', strtotime($event['event_date']))) ?>
+        <?= h(format_date($event['event_date'])) ?>
     </p>
     <?php endif; ?>
 
@@ -257,7 +257,8 @@ $progressPct = $progressTotal > 0
                 </div>
                 <?php endif; ?>
 
-                <button type="submit" class="btn btn-primary btn-sm" style="margin-bottom:0;">
+                <button type="submit" class="btn btn-primary btn-sm" style="margin-bottom:0;"
+                        data-loading-text="<?= h(__('claim.submitting')) ?>">
                     <i class="fa-solid fa-hand-pointer" aria-hidden="true"></i>
                     <?= h(__('claim.submit')) ?>
                 </button>
@@ -316,7 +317,7 @@ $progressPct = $progressTotal > 0
                     <?= h(__('guest.suggest_name')) ?> *
                 </label>
                 <input class="form-input" type="text" id="suggest_name" name="name"
-                       placeholder="z.B. Baguette" maxlength="255" required>
+                       placeholder="<?= h(__('guest.suggest_name_placeholder')) ?>" maxlength="255" required>
             </div>
             <div class="form-group" style="flex:1;min-width:150px;margin-bottom:0;">
                 <label class="form-label" style="font-size:.8125rem;" for="suggest_guest_name">
@@ -344,6 +345,16 @@ $progressPct = $progressTotal > 0
                 <?= h(__('guest.suggest_email_hint')) ?>
             </span>
         </div>
+        <div class="form-group" style="margin:.75rem 0 0;">
+            <label style="display:flex;align-items:flex-start;gap:.5rem;cursor:pointer;">
+                <input type="checkbox" name="suggester_brings" value="1" style="margin-top:.2rem;">
+                <span class="text-sm"><?= h(__('guest.suggest_brings')) ?></span>
+            </label>
+            <span class="text-muted text-sm" style="display:block;margin:.25rem 0 0 1.5rem;">
+                <?= h(__('guest.suggest_brings_hint')) ?>
+            </span>
+        </div>
+
         <?php $altchaForm = 'suggest'; include BASE_DIR . '/templates/partials/altcha_widget.php'; ?>
         <button type="submit" class="btn btn-secondary btn-sm" style="margin-top:.75rem;">
             <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>

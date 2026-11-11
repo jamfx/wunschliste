@@ -10,7 +10,7 @@ class EventController
     {
         if (list_creation_mode() === 'restricted' && current_user_id() === null) {
             $_SESSION['login_redirect'] = current_url();
-            flash('error', 'Bitte einloggen, um eine neue Liste zu erstellen.');
+            flash('error', __('event.login_required'));
             redirect(base_url('admin/login'));
         }
 
@@ -86,7 +86,7 @@ class EventController
             $rlMax    = max(1, (int) ($db->fetch("SELECT setting_value FROM site_settings WHERE setting_key='rate_event_max_count'")['setting_value'] ?? 10));
             $rlWindow = max(60, (int) ($db->fetch("SELECT setting_value FROM site_settings WHERE setting_key='rate_event_window_minutes'")['setting_value'] ?? 60) * 60);
             if (!rate_limit_check('create_event', $rlMax, $rlWindow)) {
-                $errors[] = 'Zu viele Events erstellt. Bitte warte etwas und versuche es erneut.';
+                $errors[] = __('event.rate_limited');
             }
         }
 
@@ -204,7 +204,7 @@ class EventController
         unset($event);
 
         render('event/my_lists', [
-            'pageTitle' => 'Meine Listen',
+            'pageTitle' => __('event.my_lists_title'),
             'events'    => $events,
         ]);
     }
@@ -418,13 +418,13 @@ class EventController
         if ($data['title'] === '') {
             $errors[] = __('validation.required') . ' (' . __('event.title_label') . ')';
         } elseif (mb_strlen($data['title']) > 255) {
-            $errors[] = __('event.title_label') . ': Maximal 255 Zeichen.';
+            $errors[] = __('validation.max_length', ['field' => __('event.title_label'), 'max' => 255]);
         } elseif (looks_like_link_spam($data['title'])) {
             $errors[] = __('event.title_label') . ': ' . __('validation.no_links');
         }
 
         if (mb_strlen($data['description'] ?? '') > 5000) {
-            $errors[] = __('event.description_label') . ': Maximal 5000 Zeichen.';
+            $errors[] = __('validation.max_length', ['field' => __('event.description_label'), 'max' => 5000]);
         }
 
         if ($data['creator_email'] !== '' && !filter_var($data['creator_email'], FILTER_VALIDATE_EMAIL)) {
@@ -432,12 +432,12 @@ class EventController
         }
 
         if ($data['event_date'] !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $data['event_date'])) {
-            $errors[] = __('event.date_label') . ': Ungültiges Datumsformat.';
+            $errors[] = __('validation.invalid_date', ['field' => __('event.date_label')]);
         }
 
         $days = $data['auto_delete_days'];
         if ($days < 1 || $days > 365) {
-            $errors[] = __('event.auto_delete_days') . ': Wert zwischen 1 und 365 erforderlich.';
+            $errors[] = __('validation.range', ['field' => __('event.auto_delete_days'), 'min' => 1, 'max' => 365]);
         }
 
         return $errors;

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= h($GLOBALS['translator']->getLocale()) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 – Seite nicht gefunden</title>
+    <title><?= h(__('error.404_title')) ?></title>
     <style>
         body { font-family: system-ui, sans-serif; background: #f9fafb; color: #111827;
                display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
@@ -17,8 +17,8 @@
 <body>
 <div class="box">
     <h1>404</h1>
-    <p>Diese Seite wurde nicht gefunden.</p>
-    <a href="<?= function_exists('base_url') ? base_url() : '/' ?>">← Zur Startseite</a>
+    <p><?= h(__('error.404_text')) ?></p>
+    <a href="<?= function_exists('base_url') ? base_url() : '/' ?>"><?= h(__('error.back_home')) ?></a>
 </div>
 </body>
 </html>

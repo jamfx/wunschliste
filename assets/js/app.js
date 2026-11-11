@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const submitBtn = form.querySelector('[type="submit"]');
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.textContent = submitBtn.dataset.loadingText || 'Wird gesendet…';
+                submitBtn.textContent = submitBtn.dataset.loadingText || 'Sending…';
             }
         });
     });

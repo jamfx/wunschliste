@@ -23,7 +23,7 @@ $hasRecovery = $hasRecovery ?? false;
 
         <?php if ($hasTOTP): ?>
         <p class="text-muted text-sm" style="margin-bottom:1.25rem;text-align:center;">
-            Gib den 6-stelligen Code aus deiner Authenticator-App ein.
+            <?= h(__('admin.totp_enter_code')) ?>
         </p>
 
         <form method="post" action="<?= h(base_url('admin/totp')) ?>">
@@ -72,26 +72,26 @@ $hasRecovery = $hasRecovery ?? false;
         <div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border);">
             <p class="text-muted text-sm" style="margin-bottom:.75rem;text-align:center;">
                 <i class="fa-solid fa-life-ring" aria-hidden="true"></i>
-                Kein Zugriff auf deinen zweiten Faktor?
+                <?= h(__('admin.no_second_factor')) ?>
             </p>
             <form method="post" action="<?= h(base_url('admin/totp')) ?>" autocomplete="off" novalidate>
                 <?= csrf_field() ?>
                 <input type="hidden" name="is_recovery" value="1">
                 <div class="form-group">
-                    <label class="form-label" for="recovery_code_input">Notfallcode</label>
+                    <label class="form-label" for="recovery_code_input"><?= h(__('admin.recovery_code')) ?></label>
                     <input class="form-input" type="text" id="recovery_code_input" name="totp_code"
                            maxlength="8" placeholder="XXXXXXXX"
                            style="text-transform:uppercase;letter-spacing:.15em;font-family:monospace;">
                 </div>
                 <button type="submit" class="btn btn-secondary btn-full">
                     <i class="fa-solid fa-key" aria-hidden="true"></i>
-                    Notfallcode einlösen
+                    <?= h(__('admin.recovery_redeem')) ?>
                 </button>
             </form>
         </div>
         <?php elseif (!$hasTOTP && !$hasPasskeys): ?>
         <p class="text-muted text-sm" style="text-align:center;">
-            Keine 2FA-Methode verfügbar.
+            <?= h(__('admin.no_2fa_available')) ?>
         </p>
         <?php endif; ?>
 
@@ -100,7 +100,7 @@ $hasRecovery = $hasRecovery ?? false;
     <p style="text-align:center;margin-top:1rem;">
         <a href="<?= h(base_url('admin/login')) ?>" class="text-muted text-sm">
             <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-            Zurück zum Login
+            <?= h(__('account.back_to_login')) ?>
         </a>
     </p>
 
@@ -110,7 +110,8 @@ $hasRecovery = $hasRecovery ?? false;
 <div id="passkey-auth-config" hidden
      data-csrf="<?= h($_SESSION['csrf_token']) ?>"
      data-auth-url="<?= h(base_url('admin/settings/2fa/passkey-auth')) ?>"
-     data-not-supported="<?= h(__('admin.passkey_not_supported')) ?>">
+     data-not-supported="<?= h(__('admin.passkey_not_supported')) ?>"
+     data-auth-failed="<?= h(__('security.passkey_auth_failed')) ?>">
 </div>
 <script src="<?= h(base_url('assets/js/passkey.js')) ?>?v=<?= (int) @filemtime(BASE_DIR . '/assets/js/passkey.js') ?>"></script>
 <?php endif; ?>

@@ -68,7 +68,7 @@ class Router
         if ($tpl && file_exists($tpl)) {
             include $tpl;
         } else {
-            echo '<h1>404 – Seite nicht gefunden</h1>';
+            echo '<h1>404 – Not found</h1>';
         }
     }
 }

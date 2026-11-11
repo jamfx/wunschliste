@@ -59,13 +59,13 @@ $v = [
                 <label class="form-label" for="title"><?= h(__('event.title_label')) ?> *</label>
                 <input class="form-input" type="text" id="title" name="title"
                        value="<?= h($v['title']) ?>" maxlength="255" required autofocus
-                       placeholder="z.B. Grillparty bei Max">
+                       placeholder="<?= h(__('event.title_placeholder')) ?>">
             </div>
 
             <div class="form-group">
                 <label class="form-label" for="description"><?= h(__('event.description_label')) ?></label>
                 <textarea class="form-textarea" id="description" name="description"
-                          rows="3" placeholder="Kurze Beschreibung (optional)"><?= h($v['description']) ?></textarea>
+                          rows="3" placeholder="<?= h(__('event.description_placeholder')) ?>"><?= h($v['description']) ?></textarea>
                 <p class="form-hint"><?= h(__('event.description_hint')) ?></p>
             </div>
 
@@ -86,7 +86,7 @@ $v = [
                     </label>
                     <input class="form-input" type="email" id="creator_email" name="creator_email"
                            value="<?= h($v['creator_email']) ?>"
-                           placeholder="deine@email.de" data-optional-email-input>
+                           placeholder="<?= h(__('event.email_placeholder')) ?>" data-optional-email-input>
                     <p class="form-hint"><?= h(__('event.creator_email_hint')) ?></p>
                 </div>
             </div>
@@ -140,7 +140,7 @@ $v = [
                         <input class="form-input" type="number" id="auto_delete_days" name="auto_delete_days"
                                value="<?= (int) $v['auto_delete_days'] ?>"
                                min="1" max="365" required style="width:6rem;">
-                        <span class="text-muted text-sm">Tage</span>
+                        <span class="text-muted text-sm"><?= h(__('event.days_unit')) ?></span>
                     </div>
                     <p class="form-hint"><?= h(__('event.auto_delete_hint')) ?></p>
                 </div>

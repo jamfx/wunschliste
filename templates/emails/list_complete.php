@@ -1,9 +1,14 @@
+<?php
+$e    = static fn($s): string => htmlspecialchars((string) $s, ENT_QUOTES);
+$b    = static fn($s): string => '<strong>' . htmlspecialchars((string) $s, ENT_QUOTES) . '</strong>';
+$date = static fn($d): string => date($t('format.date'), strtotime((string) $d));
+?>
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= $e($locale) ?>">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Liste vollständig</title>
+<title><?= $e($t('mail.complete_tag')) ?></title>
 <style>
   body{margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;color:#333}
   .wrap{max-width:560px;margin:32px auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.1)}
@@ -18,25 +23,23 @@
 <body>
 <div class="wrap">
   <div class="head">
-    <h1>&#x1F389; Liste vollständig vergeben!</h1>
+    <h1>&#x1F389; <?= $e($t('mail.complete_title')) ?></h1>
   </div>
   <div class="body">
     <div class="big-check">&#x2705;</div>
-    <p>Super Neuigkeit! Alle Mitbringsel auf deiner Liste
-    <strong><?= htmlspecialchars($event['title'], ENT_QUOTES) ?></strong>
-    wurden vollständig beansprucht. Jeder bringt etwas mit!</p>
+    <p><?= $t('mail.complete_intro', ['event' => $b($event['title'])]) ?></p>
 
     <?php if (!empty($event['event_date'])): ?>
-    <p>Datum: <strong><?= htmlspecialchars(date('d.m.Y', strtotime($event['event_date'])), ENT_QUOTES) ?></strong></p>
+    <p><?= $t('mail.date_line', ['date' => $b($date($event['event_date']))]) ?></p>
     <?php endif; ?>
 
     <a class="link-btn"
-       href="<?= htmlspecialchars($adminUrl, ENT_QUOTES) ?>">
-      Event ansehen
+       href="<?= $e($adminUrl) ?>">
+      <?= $e($t('mail.view_event')) ?>
     </a>
   </div>
   <div class="footer">
-    Diese E-Mail wurde automatisch von <?= htmlspecialchars(site_title(), ENT_QUOTES) ?> gesendet.
+    <?= $e($t('mail.auto_footer', ['site' => site_title()])) ?>
   </div>
 </div>
 </body>

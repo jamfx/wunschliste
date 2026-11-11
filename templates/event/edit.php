@@ -147,7 +147,7 @@ $hasAccessPassword  = !empty($event['access_password_hash']);
                         <input class="form-input" type="number" id="auto_delete_days" name="auto_delete_days"
                                value="<?= (int) $v['auto_delete_days'] ?>"
                                min="1" max="365" required style="width:6rem;">
-                        <span class="text-muted text-sm">Tage</span>
+                        <span class="text-muted text-sm"><?= h(__('event.days_unit')) ?></span>
                     </div>
                     <p class="form-hint"><?= h(__('event.auto_delete_hint')) ?></p>
                 </div>

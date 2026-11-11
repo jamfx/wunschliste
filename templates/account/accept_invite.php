@@ -10,8 +10,8 @@
         <i class="fa-solid fa-user-check"
            aria-hidden="true"
            style="font-size:2.5rem;color:var(--primary-color);"></i>
-        <h1 style="font-size:1.5rem;margin-top:.5rem;">Account einrichten</h1>
-        <p class="text-muted text-sm">Lege ein Passwort für <strong><?= h($email) ?></strong> fest.</p>
+        <h1 style="font-size:1.5rem;margin-top:.5rem;"><?= h(__('account.setup_title')) ?></h1>
+        <p class="text-muted text-sm"><?= __('account.setup_intro', ['email' => '<strong>' . h($email) . '</strong>']) ?></p>
     </div>
 
     <div class="card">
@@ -22,18 +22,18 @@
                 <label class="form-label" for="password"><?= h(__('admin.password')) ?></label>
                 <input class="form-input" type="password" id="password" name="password"
                        autocomplete="new-password" minlength="8" required autofocus>
-                <p class="form-hint">Mindestens 8 Zeichen.</p>
+                <p class="form-hint"><?= h(__('account.password_min_hint')) ?></p>
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="password_confirm">Passwort bestätigen</label>
+                <label class="form-label" for="password_confirm"><?= h(__('account.password_confirm')) ?></label>
                 <input class="form-input" type="password" id="password_confirm" name="password_confirm"
                        autocomplete="new-password" minlength="8" required>
             </div>
 
             <button type="submit" class="btn btn-primary btn-full" style="margin-top:.5rem;">
                 <i class="fa-solid fa-check" aria-hidden="true"></i>
-                Account aktivieren
+                <?= h(__('account.activate')) ?>
             </button>
         </form>
     </div>

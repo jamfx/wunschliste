@@ -24,11 +24,11 @@ class ItemController
             redirect(base_url('e/' . $event['admin_token'] . '/manage'));
         }
         if (mb_strlen($name) > 255) {
-            flash('error', __('item.name') . ': Maximal 255 Zeichen.');
+            flash('error', __('validation.max_length', ['field' => __('item.name'), 'max' => 255]));
             redirect(base_url('e/' . $event['admin_token'] . '/manage'));
         }
         if ($quantity < 1 || $quantity > 999) {
-            flash('error', __('item.quantity') . ': Wert zwischen 1 und 999 erforderlich.');
+            flash('error', __('validation.range', ['field' => __('item.quantity'), 'min' => 1, 'max' => 999]));
             redirect(base_url('e/' . $event['admin_token'] . '/manage'));
         }
 
@@ -46,7 +46,7 @@ class ItemController
             'status'     => 'approved',
         ]);
 
-        flash('success', '"' . $name . '" wurde hinzugefügt.');
+        flash('success', __('item.added', ['name' => $name]));
         redirect(base_url('e/' . $event['admin_token'] . '/manage'));
     }
 
@@ -73,7 +73,7 @@ class ItemController
             redirect(base_url('e/' . $event['admin_token'] . '/manage'));
         }
         if ($quantity < 1 || $quantity > 999) {
-            flash('error', __('item.quantity') . ': Wert zwischen 1 und 999 erforderlich.');
+            flash('error', __('validation.range', ['field' => __('item.quantity'), 'min' => 1, 'max' => 999]));
             redirect(base_url('e/' . $event['admin_token'] . '/manage'));
         }
 
@@ -85,18 +85,14 @@ class ItemController
             );
             $claimed = (int) ($claimedRow['total'] ?? 0);
             if ($claimed > $quantity) {
-                flash('error', sprintf(
-                    'Menge kann nicht auf %d reduziert werden — bereits %d Exemplar(e) beansprucht.',
-                    $quantity,
-                    $claimed
-                ));
+                flash('error', __('item.quantity_below_claimed', ['quantity' => $quantity, 'claimed' => $claimed]));
                 redirect(base_url('e/' . $event['admin_token'] . '/manage'));
             }
         }
 
         $db->update('items', ['name' => $name, 'quantity' => $quantity], ['id' => $item['id']]);
 
-        flash('success', 'Item aktualisiert.');
+        flash('success', __('item.updated'));
         redirect(base_url('e/' . $event['admin_token'] . '/manage'));
     }
 
@@ -117,7 +113,7 @@ class ItemController
 
         $db->delete('items', ['id' => $item['id']]);
 
-        flash('success', '"' . $item['name'] . '" wurde gelöscht.');
+        flash('success', __('item.deleted', ['name' => $item['name']]));
         redirect(base_url('e/' . $event['admin_token'] . '/manage'));
     }
 
@@ -138,14 +134,58 @@ class ItemController
 
         $quantity = (int) ($_POST['quantity'] ?? $item['quantity']);
         if ($quantity < 1 || $quantity > 999) {
-            flash('error', __('item.quantity') . ': Wert zwischen 1 und 999 erforderlich.');
+            flash('error', __('validation.range', ['field' => __('item.quantity'), 'min' => 1, 'max' => 999]));
             redirect(base_url('e/' . $event['admin_token'] . '/manage'));
         }
 
+        $wasPending = ($item['status'] === 'pending');
         $db->update('items', ['status' => 'approved', 'quantity' => $quantity], ['id' => $item['id']]);
-        $this->notifySuggester($event, array_merge($item, ['quantity' => $quantity]), true);
 
-        flash('success', '"' . $item['name'] . '" wurde freigegeben.');
+        // The suggester pledged to bring it: becomes a claim of min(pledge, final quantity).
+        $claimed = 0;
+        if ($wasPending && (int) ($item['suggester_brings_qty'] ?? 0) > 0) {
+            $claimed = $this->createSuggesterClaim($event, $item, $quantity);
+        }
+
+        $this->notifySuggester($event, array_merge($item, ['quantity' => $quantity]), true, $claimed);
+
+        if ($claimed > 0) {
+            flash('success', __('item.approved_with_claim', [
+                'name' => $item['name'], 'guest' => $item['suggested_by_guest'], 'quantity' => $claimed,
+            ]));
+        } else {
+            flash('success', __('item.approved', ['name' => $item['name']]));
+        }
+        redirect(base_url('e/' . $event['admin_token'] . '/manage'));
+    }
+
+    // ------------------------------------------------------------------
+    // POST /e/{admin_token}/claims/{id}/delete
+    // Organiser removes a single claim (e.g. a pledge that was taken over
+    // from a suggestion and can no longer be undone by the guest).
+    // ------------------------------------------------------------------
+    public function removeClaim(array $params = []): void
+    {
+        global $db;
+
+        $event = $this->loadEvent($params['admin_token'] ?? '');
+        require_event_owner_access($event);
+
+        if (!csrf_verify()) {
+            abort(403);
+        }
+
+        $claim = $db->fetch(
+            'SELECT c.* FROM claims c JOIN items i ON i.id = c.item_id WHERE c.id = ? AND i.event_id = ?',
+            [(int) ($params['id'] ?? 0), $event['id']]
+        );
+        if (!$claim) {
+            abort(404);
+        }
+
+        $db->delete('claims', ['id' => $claim['id']]);
+
+        flash('success', __('item.claim_removed', ['name' => $claim['guest_name']]));
         redirect(base_url('e/' . $event['admin_token'] . '/manage'));
     }
 
@@ -168,7 +208,7 @@ class ItemController
         $this->notifySuggester($event, $item, false);
         $db->delete('items', ['id' => $item['id']]);
 
-        flash('success', 'Vorschlag "' . $item['name'] . '" wurde abgelehnt und gelöscht.');
+        flash('success', __('item.rejected', ['name' => $item['name']]));
         redirect(base_url('e/' . $event['admin_token'] . '/manage'));
     }
 
@@ -235,11 +275,42 @@ class ItemController
     // ------------------------------------------------------------------
 
     /**
+     * Create the claim for a suggester who pledged to bring the item. Returns the
+     * claimed quantity. Marked as already notified: the organiser just approved
+     * it themselves, so no "item claimed" mail is wanted.
+     */
+    private function createSuggesterClaim(array $event, array $item, int $finalQuantity): int
+    {
+        global $db;
+
+        $qty = min((int) $item['suggester_brings_qty'], $finalQuantity);
+        // Gift mode: a claim is one person's place on a multi-person item.
+        if (!empty($event['gift_mode']) && $finalQuantity > 1) {
+            $qty = 1;
+        }
+        if ($qty < 1) {
+            return 0;
+        }
+
+        $now = date('Y-m-d H:i:s');
+        $db->insert('claims', [
+            'item_id'             => $item['id'],
+            'guest_name'          => (string) $item['suggested_by_guest'],
+            'quantity'            => $qty,
+            'finalize_at'         => $now,
+            'creator_notified_at' => $now,
+        ]);
+        $db->update('items', ['suggester_brings_qty' => null], ['id' => $item['id']]);
+
+        return $qty;
+    }
+
+    /**
      * Tell the suggester (if they left an address) how the organiser decided.
      * Best-effort: a mail failure never blocks the organiser's action. The
      * address is wiped afterwards; on rejection the row is deleted anyway.
      */
-    private function notifySuggester(array $event, array $item, bool $approved): void
+    private function notifySuggester(array $event, array $item, bool $approved, int $claimed = 0): void
     {
         global $db;
 
@@ -262,6 +333,7 @@ class ItemController
                 'event'    => $event,
                 'item'     => $item,
                 'approved' => $approved,
+                'claimed'  => $claimed,
                 'note'     => $note,
                 'guestUrl' => base_url('g/' . $event['guest_token']),
                 't'        => $t,

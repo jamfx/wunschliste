@@ -71,8 +71,7 @@ $post = $post ?? [];
                             data-hide-label="<?= h(__('common.password_hide')) ?>">👁</button>
                 </div>
                 <p class="form-hint">
-                    Kann leer bleiben, falls kein Passwort gesetzt ist.
-                    Alle Sonderzeichen werden unterstützt.
+                    <?= h(__('install.db_pass_hint')) ?>
                 </p>
             </div>
         </div>

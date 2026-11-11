@@ -1,9 +1,14 @@
+<?php
+$e    = static fn($s): string => htmlspecialchars((string) $s, ENT_QUOTES);
+$b    = static fn($s): string => '<strong>' . htmlspecialchars((string) $s, ENT_QUOTES) . '</strong>';
+$date = static fn($d): string => date($t('format.date'), strtotime((string) $d));
+?>
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= $e($locale) ?>">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Neuer Vorschlag</title>
+<title><?= $e($t('mail.suggested_tag')) ?></title>
 <style>
   body{margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;color:#333}
   .wrap{max-width:560px;margin:32px auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.1)}
@@ -20,27 +25,29 @@
 <body>
 <div class="wrap">
   <div class="head">
-    <h1>&#x1F4A1; Neuer Mitbringsel-Vorschlag</h1>
+    <h1>&#x1F4A1; <?= $e($t('mail.suggested_title')) ?></h1>
   </div>
   <div class="body">
-    <p>Hallo,<br>
-    ein Gast hat ein neues Mitbringsel für deine Liste
-    <strong><?= htmlspecialchars($event['title'], ENT_QUOTES) ?></strong> vorgeschlagen:</p>
+    <p><?= $e($t('mail.hello')) ?><br>
+    <?= $t('mail.suggested_intro', ['event' => $b($event['title'])]) ?></p>
 
     <div class="item-box">
-      <p class="item-name"><?= htmlspecialchars($item['name'], ENT_QUOTES) ?></p>
-      <p class="meta">&#x1F464; Vorgeschlagen von: <?= htmlspecialchars($item['suggested_by_guest'], ENT_QUOTES) ?></p>
+      <p class="item-name"><?= $e($item['name']) ?></p>
+      <p class="meta">&#x1F464; <?= $e($t('mail.suggested_by', ['name' => $item['suggested_by_guest']])) ?></p>
+      <?php if ((int) ($item['quantity'] ?? 1) > 1): ?>
+      <p class="meta"><?= $e($t('mail.quantity', ['quantity' => (int) $item['quantity']])) ?></p>
+      <?php endif; ?>
     </div>
 
-    <p>Du kannst den Vorschlag in der Event-Verwaltung freigeben oder ablehnen.</p>
+    <p><?= $e($t('mail.suggested_hint')) ?></p>
 
     <a class="link-btn"
-       href="<?= htmlspecialchars($adminUrl, ENT_QUOTES) ?>">
-      Vorschlag prüfen
+       href="<?= $e($adminUrl) ?>">
+      <?= $e($t('mail.suggested_button')) ?>
     </a>
   </div>
   <div class="footer">
-    Diese E-Mail wurde automatisch von <?= htmlspecialchars(site_title(), ENT_QUOTES) ?> gesendet.
+    <?= $e($t('mail.auto_footer', ['site' => site_title()])) ?>
   </div>
 </div>
 </body>

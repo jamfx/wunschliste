@@ -1,9 +1,14 @@
+<?php
+$e    = static fn($s): string => htmlspecialchars((string) $s, ENT_QUOTES);
+$b    = static fn($s): string => '<strong>' . htmlspecialchars((string) $s, ENT_QUOTES) . '</strong>';
+$date = static fn($d): string => date($t('format.date'), strtotime((string) $d));
+?>
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= $e($locale) ?>">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title><?= htmlspecialchars($claim['guest_name'], ENT_QUOTES) ?> hat <?= htmlspecialchars($item['name'], ENT_QUOTES) ?> zurückgezogen</title>
+<title><?= $e($t('mail.withdrawn_subject', ['guest' => $claim['guest_name'], 'item' => $item['name']])) ?></title>
 <style>
   body{margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;color:#333}
   .wrap{max-width:560px;margin:32px auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.1)}
@@ -20,32 +25,31 @@
 <body>
 <div class="wrap">
   <div class="head">
-    <h1>&#x21A9;&#xFE0F; <?= htmlspecialchars($claim['guest_name'], ENT_QUOTES) ?> hat die Übernahme von <?= htmlspecialchars($item['name'], ENT_QUOTES) ?> bei <?= htmlspecialchars($event['title'], ENT_QUOTES) ?> zurückgezogen</h1>
+    <h1>&#x21A9;&#xFE0F; <?= $e($t('mail.withdrawn_title', ['guest' => $claim['guest_name'], 'item' => $item['name'], 'event' => $event['title']])) ?></h1>
   </div>
   <div class="body">
-    <p>Eine zuvor gemeldete Übernahme für deine Liste
-    <strong><?= htmlspecialchars($event['title'], ENT_QUOTES) ?></strong>
     <?php if (!empty($event['event_date'])): ?>
-    am <strong><?= htmlspecialchars(date('d.m.Y', strtotime($event['event_date'])), ENT_QUOTES) ?></strong>
+    <p><?= $t('mail.withdrawn_intro_dated', ['event' => $b($event['title']), 'date' => $b($date($event['event_date']))]) ?></p>
+    <?php else: ?>
+    <p><?= $t('mail.withdrawn_intro', ['event' => $b($event['title'])]) ?></p>
     <?php endif; ?>
-    wurde soeben wieder zurückgenommen:</p>
 
     <div class="item-box">
-      <p class="item-name">&#x1F4E6; <?= htmlspecialchars($item['name'], ENT_QUOTES) ?></p>
-      <p class="meta">&#x1F464; <strong><?= htmlspecialchars($claim['guest_name'], ENT_QUOTES) ?></strong> bringt es nun doch nicht mit</p>
+      <p class="item-name">&#x1F4E6; <?= $e($item['name']) ?></p>
+      <p class="meta">&#x1F464; <?= $t('mail.withdrawn_not_bringing', ['guest' => $b($claim['guest_name'])]) ?></p>
       <?php if ((int)$claim['quantity'] > 1): ?>
-      <p class="meta">Menge: <?= (int)$claim['quantity'] ?></p>
+      <p class="meta"><?= $e($t('mail.quantity', ['quantity' => (int)$claim['quantity']])) ?></p>
       <?php endif; ?>
     </div>
 
-    <p>Das Mitbringsel ist jetzt wieder offen und kann von jemand anderem übernommen werden.</p>
+    <p><?= $e($t('mail.withdrawn_open')) ?></p>
 
-    <a class="link-btn" href="<?= htmlspecialchars($adminUrl, ENT_QUOTES) ?>">
-      Veranstaltung verwalten
+    <a class="link-btn" href="<?= $e($adminUrl) ?>">
+      <?= $e($t('mail.manage_event')) ?>
     </a>
   </div>
   <div class="footer">
-    Diese E-Mail wurde automatisch von <?= htmlspecialchars(site_title(), ENT_QUOTES) ?> gesendet.
+    <?= $e($t('mail.auto_footer', ['site' => site_title()])) ?>
   </div>
 </div>
 </body>

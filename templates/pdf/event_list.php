@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<?= h($GLOBALS['translator']->getLocale()) ?>">
 <head>
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($event['title'], ENT_QUOTES) ?></title>
@@ -141,9 +141,9 @@ if ($showLogo && $logoPath !== '') {
 
 <div class="meta">
 <?php if (!empty($event['event_date'])): ?>
-    Datum: <?= htmlspecialchars(date('d.m.Y', strtotime($event['event_date'])), ENT_QUOTES) ?> &nbsp;|&nbsp;
+    <?= htmlspecialchars(__('pdf.date_label'), ENT_QUOTES) ?>: <?= htmlspecialchars(format_date($event['event_date']), ENT_QUOTES) ?> &nbsp;|&nbsp;
 <?php endif; ?>
-    Erstellt: <?= htmlspecialchars(date('d.m.Y', strtotime($event['created_at'])), ENT_QUOTES) ?>
+    <?= htmlspecialchars(__('pdf.created_label'), ENT_QUOTES) ?>: <?= htmlspecialchars(format_date($event['created_at']), ENT_QUOTES) ?>
 <?php if (!empty($event['description'])): ?>
     <div class="md"><?= md($event['description']) ?></div>
 <?php endif; ?>
@@ -171,9 +171,9 @@ $pct      = $total > 0 ? round(($claimed / $total) * 100) : 0;
     <thead>
         <tr>
             <th style="width:45%;"><?= htmlspecialchars(__('pdf.item_column'), ENT_QUOTES) ?></th>
-            <th style="width:12%;">Menge</th>
+            <th style="width:12%;"><?= htmlspecialchars(__('pdf.quantity_column'), ENT_QUOTES) ?></th>
             <?php if ($guestSeesNames): ?>
-            <th>Mitgebracht von</th>
+            <th><?= htmlspecialchars(__('pdf.claimed_by_column'), ENT_QUOTES) ?></th>
             <?php endif; ?>
         </tr>
     </thead>
@@ -208,12 +208,12 @@ $pct      = $total > 0 ? round(($claimed / $total) * 100) : 0;
 <?php endif; ?>
 
 <?php if ($isAdmin && !empty($pending)): ?>
-<div class="section-header">Vorschläge (ausstehend)</div>
+<div class="section-header"><?= htmlspecialchars(__('pdf.pending_section'), ENT_QUOTES) ?></div>
 <table>
     <thead>
         <tr>
             <th><?= htmlspecialchars(__('pdf.item_column'), ENT_QUOTES) ?></th>
-            <th>Vorgeschlagen von</th>
+            <th><?= htmlspecialchars(__('pdf.suggested_by_column'), ENT_QUOTES) ?></th>
         </tr>
     </thead>
     <tbody>

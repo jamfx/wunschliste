@@ -11,6 +11,31 @@ upgrade.
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-11-11
+
+### Added
+
+- Suggestions: a guest can tick "I will bring this too". On approval the
+  suggested quantity becomes a claim of min(pledge, final quantity) — the
+  organiser can still raise or lower the quantity. The organiser sees the
+  pledge in the suggestion list; no "item claimed" mail is sent for it (they
+  approved it themselves); the decision mail to the suggester states how many
+  they bring. In gift mode a pledge takes one place. Requires
+  `migrations/004_suggester_claim.sql` (apply via Admin → Database update).
+- The organiser can remove a single claim on the management page (the ×
+  next to a name), e.g. a pledge that the guest can no longer undo themselves.
+
+### Changed
+
+- All remaining hard-coded German texts moved into `lang/de.json` and
+  `lang/en.json` (flash messages, account/2FA/admin pages, installer, error
+  pages, PDF labels, JavaScript fallbacks). Dates follow the language's
+  `format.date`.
+- E-mails are now translated (DE/EN): organiser notifications and cron mails
+  use the site default language; password-reset and invitation mails use the
+  language of the person who triggered them; suggestion decisions use the
+  suggester's language. Previously all of these were German only.
+
 ## [1.2.0] - 2026-11-11
 
 ### Security

@@ -19,7 +19,7 @@ $navItems = [
 ];
 ?>
 <aside class="admin-sidebar">
-    <nav aria-label="Admin-Navigation">
+    <nav aria-label="<?= h(__('admin.nav_label')) ?>">
         <?php foreach ($navItems as $key => $item): ?>
         <a href="<?= h($item['url']) ?>"
            class="<?= $currentAdminPage === $key ? 'active' : '' ?>">

@@ -9,8 +9,8 @@
         <i class="fa-solid fa-key"
            aria-hidden="true"
            style="font-size:2.5rem;color:var(--primary-color);"></i>
-        <h1 style="font-size:1.5rem;margin-top:.5rem;">Passwort vergessen</h1>
-        <p class="text-muted text-sm">Gib deine E-Mail-Adresse ein, um einen Link zum Zurücksetzen zu erhalten.</p>
+        <h1 style="font-size:1.5rem;margin-top:.5rem;"><?= h(__('account.forgot_title')) ?></h1>
+        <p class="text-muted text-sm"><?= h(__('account.forgot_intro')) ?></p>
     </div>
 
     <div class="card">
@@ -25,7 +25,7 @@
 
             <button type="submit" class="btn btn-primary btn-full" style="margin-top:.5rem;">
                 <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
-                Link anfordern
+                <?= h(__('account.forgot_submit')) ?>
             </button>
         </form>
     </div>
@@ -33,7 +33,7 @@
     <p class="text-center text-sm" style="margin-top:1rem;">
         <a href="<?= h(base_url('admin/login')) ?>" style="color:var(--text-muted);">
             <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-            Zurück zum Login
+            <?= h(__('account.back_to_login')) ?>
         </a>
     </p>
 

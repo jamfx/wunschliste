@@ -42,6 +42,10 @@ $color = $approved ? '#16a34a' : '#6b7280';
       <?php endif; ?>
     </div>
 
+    <?php if ($approved && !empty($claimed)): ?>
+    <p><strong><?= $e($t('mail.decision_claimed', ['quantity' => (int) $claimed])) ?></strong></p>
+    <?php endif; ?>
+
     <?php if ($note !== ''): ?>
     <p style="margin-bottom:4px;"><strong><?= $e($t('mail.decision_note')) ?></strong></p>
     <div class="note"><?= $e($note) ?></div>

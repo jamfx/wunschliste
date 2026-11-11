@@ -412,11 +412,11 @@ class AdminController
         $id    = (int) ($params['id'] ?? 0);
         $event = $db->fetch('SELECT id, title FROM events WHERE id = ?', [$id]);
         if (!$event) {
-            flash('error', 'Event nicht gefunden.');
+            flash('error', __('admin.event_not_found'));
             redirect(base_url('admin/dashboard'));
         }
         $db->delete('events', ['id' => $id]);
-        flash('success', 'Event "' . $event['title'] . '" wurde gelöscht.');
+        flash('success', __('admin.event_deleted', ['title' => $event['title']]));
         redirect(base_url('admin/dashboard'));
     }
 
@@ -428,7 +428,7 @@ class AdminController
             abort(403);
         }
         $deleted = $this->performCleanup();
-        flash('success', $deleted['events'] . ' abgelaufene Event(s) und ' . $deleted['rate_limit'] . ' Rate-Limit-Eintrag/Einträge gelöscht.');
+        flash('success', __('admin.cleanup_done', ['events' => $deleted['events'], 'rate' => $deleted['rate_limit']]));
         redirect(base_url('admin/dashboard'));
     }
 
@@ -479,8 +479,8 @@ class AdminController
         $mailer        = new Mailer($emailSettings);
         $html          = Mailer::renderTemplate('user_invite', [
             'inviteUrl' => base_url('invite/' . $token),
-        ]);
-        return $mailer->send($email, 'Einladung zu ' . site_title(), $html);
+        ], $GLOBALS['translator']->getLocale());
+        return $mailer->send($email, __('mail.invite_subject', ['site' => site_title()]), $html);
     }
 
     /** POST /admin/users/invite */
@@ -493,13 +493,13 @@ class AdminController
 
         $email = trim($_POST['email'] ?? '');
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            flash('error', 'Bitte eine gültige E-Mail-Adresse angeben.');
+            flash('error', __('validation.email'));
             redirect(base_url('admin/users'));
         }
 
         global $db;
         if ($db->fetch('SELECT id FROM users WHERE email = ?', [$email])) {
-            flash('error', 'Es existiert bereits ein Account mit dieser E-Mail-Adresse.');
+            flash('error', __('admin.user_exists'));
             redirect(base_url('admin/users'));
         }
 
@@ -510,9 +510,9 @@ class AdminController
         ]);
 
         if ($this->sendInvite($userId, $email)) {
-            flash('success', 'Einladung an ' . h($email) . ' wurde versendet.');
+            flash('success', __('admin.invite_sent', ['email' => $email]));
         } else {
-            flash('error', 'Benutzer wurde angelegt, aber die Einladungs-E-Mail konnte nicht versendet werden. Bitte E-Mail-Einstellungen prüfen und die Einladung erneut senden.');
+            flash('error', __('admin.invite_created_mail_failed'));
         }
         redirect(base_url('admin/users'));
     }
@@ -529,18 +529,18 @@ class AdminController
         $id   = (int) ($params['id'] ?? 0);
         $user = $db->fetch("SELECT * FROM users WHERE id = ? AND role = 'user'", [$id]);
         if (!$user) {
-            flash('error', 'Benutzer nicht gefunden.');
+            flash('error', __('admin.user_not_found'));
             redirect(base_url('admin/users'));
         }
         if ($user['password_hash'] !== null) {
-            flash('error', 'Dieser Account wurde bereits aktiviert.');
+            flash('error', __('admin.already_activated'));
             redirect(base_url('admin/users'));
         }
 
         if ($this->sendInvite((int) $user['id'], $user['email'])) {
-            flash('success', 'Einladung wurde erneut versendet.');
+            flash('success', __('admin.invite_resent'));
         } else {
-            flash('error', 'Einladungs-E-Mail konnte nicht versendet werden. Bitte E-Mail-Einstellungen prüfen.');
+            flash('error', __('admin.invite_mail_failed'));
         }
         redirect(base_url('admin/users'));
     }
@@ -563,14 +563,14 @@ class AdminController
         $id   = (int) ($params['id'] ?? 0);
         $user = $db->fetch("SELECT * FROM users WHERE id = ? AND role = 'user'", [$id]);
         if (!$user) {
-            flash('error', 'Benutzer nicht gefunden.');
+            flash('error', __('admin.user_not_found'));
             redirect(base_url('admin/users'));
         }
 
         $newStatus = $user['status'] === 'active' ? 'disabled' : 'active';
         $db->update('users', ['status' => $newStatus], ['id' => $id]);
 
-        flash('success', $newStatus === 'active' ? 'Account wurde entsperrt.' : 'Account wurde gesperrt.');
+        flash('success', $newStatus === 'active' ? __('admin.user_unlocked') : __('admin.user_locked'));
         redirect(base_url('admin/users'));
     }
 
@@ -590,13 +590,13 @@ class AdminController
         $id   = (int) ($params['id'] ?? 0);
         $user = $db->fetch("SELECT * FROM users WHERE id = ? AND role = 'user'", [$id]);
         if (!$user) {
-            flash('error', 'Benutzer nicht gefunden.');
+            flash('error', __('admin.user_not_found'));
             redirect(base_url('admin/users'));
         }
 
         $db->delete('users', ['id' => $id]);
 
-        flash('success', 'Account "' . h($user['email']) . '" wurde gelöscht.');
+        flash('success', __('admin.user_deleted', ['email' => $user['email']]));
         redirect(base_url('admin/users'));
     }
 
@@ -676,7 +676,7 @@ class AdminController
         $this->saveSiteSetting('default_language',  $defaultLanguage);
         $this->saveSiteSetting('license_url',       $licenseUrl);
 
-        flash('success', 'Design-Einstellungen gespeichert.');
+        flash('success', __('admin.design_saved'));
         redirect(base_url('admin/settings/design'));
     }
 
@@ -689,13 +689,13 @@ class AdminController
         }
 
         if (empty($_FILES['logo']) || $_FILES['logo']['error'] !== UPLOAD_ERR_OK) {
-            flash('error', 'Upload fehlgeschlagen oder keine Datei ausgewählt.');
+            flash('error', __('admin.upload_failed'));
             redirect(base_url('admin/settings/design'));
         }
 
         $file = $_FILES['logo'];
         if ($file['size'] > 2 * 1024 * 1024) {
-            flash('error', 'Datei zu groß (max. 2 MB).');
+            flash('error', __('admin.file_too_large'));
             redirect(base_url('admin/settings/design'));
         }
 
@@ -704,7 +704,7 @@ class AdminController
         $allowedMime = ['image/jpeg' => 'jpg', 'image/png' => 'png'];
         $mime        = mime_content_type($file['tmp_name']);
         if (!isset($allowedMime[$mime])) {
-            flash('error', 'Ungültiges Dateiformat (erlaubt: JPG, PNG).');
+            flash('error', __('admin.file_invalid_type'));
             redirect(base_url('admin/settings/design'));
         }
         $ext = $allowedMime[$mime];
@@ -723,12 +723,12 @@ class AdminController
 
         $filename = 'logo_' . time() . '.' . $ext;
         if (!move_uploaded_file($file['tmp_name'], $uploadsDir . '/' . $filename)) {
-            flash('error', 'Fehler beim Speichern der Datei.');
+            flash('error', __('admin.file_save_failed'));
             redirect(base_url('admin/settings/design'));
         }
 
         $this->saveSiteSetting('logo_path', 'uploads/' . $filename);
-        flash('success', 'Logo erfolgreich hochgeladen.');
+        flash('success', __('admin.logo_uploaded'));
         redirect(base_url('admin/settings/design'));
     }
 
@@ -747,7 +747,7 @@ class AdminController
         }
 
         $this->saveSiteSetting('logo_path', '');
-        flash('success', 'Logo wurde entfernt.');
+        flash('success', __('admin.logo_removed'));
         redirect(base_url('admin/settings/design'));
     }
 
@@ -810,7 +810,7 @@ class AdminController
             'from_name'     => trim($_POST['from_name']     ?? ''),
         ]);
 
-        flash('success', 'E-Mail-Einstellungen gespeichert.');
+        flash('success', __('admin.email_saved'));
         redirect(base_url('admin/email'));
     }
 
@@ -829,14 +829,13 @@ class AdminController
                   : ($user['email'] ?? '');
 
         if ($to === '' || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
-            flash('error', 'Keine gültige Empfänger-E-Mail angegeben.');
+            flash('error', __('admin.test_recipient_invalid'));
             redirect(base_url('admin/email'));
         }
 
         $mailer = new Mailer($settings);
-        $body   = '<p>Dies ist eine Test-E-Mail von <strong>' . htmlspecialchars(site_title(), ENT_QUOTES) . '</strong>.'
-                . ' Die E-Mail-Konfiguration funktioniert korrekt.</p>';
-        if ($mailer->send($to, 'Test-Mail von ' . site_title(), $body)) {
+        $body   = '<p>' . __('admin.email_test_body', ['site' => '<strong>' . htmlspecialchars(site_title(), ENT_QUOTES) . '</strong>']) . '</p>';
+        if ($mailer->send($to, __('mail.test_subject', ['site' => site_title()]), $body)) {
             flash('success', __('admin.email_test_success'));
         } else {
             flash('error', __('admin.email_test_error', ['error' => $mailer->lastError]));
@@ -883,7 +882,7 @@ class AdminController
         $this->saveSiteSetting('pdf_show_logo',   $showLogo);
         $this->saveSiteSetting('pdf_footer_text', $footer);
 
-        flash('success', 'PDF-Einstellungen gespeichert.');
+        flash('success', __('admin.pdf_saved'));
         redirect(base_url('admin/pdf-settings'));
     }
 
@@ -943,7 +942,7 @@ class AdminController
         if ($action === 'list_creation_mode') {
             $mode = ($_POST['list_creation_mode'] ?? '') === 'restricted' ? 'restricted' : 'open';
             $this->saveSiteSetting('list_creation_mode', $mode);
-            flash('success', 'Einstellung gespeichert.');
+            flash('success', __('admin.setting_saved'));
             redirect(base_url('admin/settings/security'));
         }
 
@@ -1102,7 +1101,7 @@ class AdminController
                 $stmt->execute([$userId]);
                 if ((int) $stmt->fetchColumn() === 0) {
                     http_response_code(400);
-                    echo json_encode(['error' => 'Keine Passkeys registriert.']);
+                    echo json_encode(['error' => __('security.no_passkeys')]);
                     return;
                 }
 
@@ -1130,14 +1129,14 @@ class AdminController
 
                 if (!$passkey) {
                     http_response_code(400);
-                    echo json_encode(['error' => 'Passkey nicht gefunden.']);
+                    echo json_encode(['error' => __('security.passkey_not_found')]);
                     return;
                 }
 
                 $challenge = $_SESSION['webauthn_auth_challenge'] ?? null;
                 if (!$challenge) {
                     http_response_code(400);
-                    echo json_encode(['error' => 'Keine Challenge in der Session.']);
+                    echo json_encode(['error' => __('security.no_challenge')]);
                     return;
                 }
 
@@ -1165,7 +1164,7 @@ class AdminController
                 $user = $db->fetch('SELECT * FROM users WHERE id = ?', [$userId]);
                 if (!$user) {
                     http_response_code(400);
-                    echo json_encode(['error' => 'Account nicht gefunden.']);
+                    echo json_encode(['error' => __('admin.account_not_found')]);
                     return;
                 }
                 $this->establishSession($user);

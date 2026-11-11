@@ -22,8 +22,7 @@
     <?php else: ?>
     <div class="alert alert-info">
         <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-        Diese Liste gehört zu deinem Account und ist jederzeit unter
-        <a href="<?= h(base_url('my/lists')) ?>">Meine Listen</a> erreichbar.
+        <?= __('event.created_owned_note', ['link' => '<a href="' . h(base_url('my/lists')) . '">' . h(__('event.my_lists_title')) . '</a>']) ?>
     </div>
     <?php endif; ?>
 
@@ -42,12 +41,12 @@
                     data-copy-target="adminLinkInput"
                     data-success-msg="<?= h(__('event.copy_success')) ?>">
                 <i class="fa-solid fa-copy" aria-hidden="true"></i>
-                Kopieren
+                <?= h(__('common.copy')) ?>
             </button>
         </div>
         <p class="form-hint" style="margin-top:.5rem;">
             <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-            Nur du hast diesen Link. Verlierst du ihn, gibt es keinen Zugang zur Verwaltung.
+            <?= h(__('event.admin_link_only_you')) ?>
         </p>
     </div>
 
@@ -66,17 +65,17 @@
                     data-copy-target="guestLinkInput"
                     data-success-msg="<?= h(__('event.copy_success')) ?>">
                 <i class="fa-solid fa-copy" aria-hidden="true"></i>
-                Kopieren
+                <?= h(__('common.copy')) ?>
             </button>
         </div>
         <p class="form-hint" style="margin-top:.5rem;">
-            Diesen Link teilst du mit deinen Gästen.
+            <?= h(__('event.guest_link_share')) ?>
         </p>
         <?php if (!empty($event['access_password_hash'])): ?>
         <p class="form-hint" style="margin-top:.375rem;">
             <i class="fa-solid fa-lock" aria-hidden="true"></i>
             <?= h(__('event.access_password_active')) ?>
-            Vergiss nicht, das Passwort separat an deine Gäste weiterzugeben.
+            <?= h(__('event.password_share_hint')) ?>
         </p>
         <?php endif; ?>
     </div>
@@ -89,7 +88,7 @@
         </a>
         <a href="<?= h(base_url()) ?>" class="btn btn-secondary">
             <i class="fa-solid fa-plus" aria-hidden="true"></i>
-            Weiteres Event erstellen
+            <?= h(__('event.create_another')) ?>
         </a>
     </div>
 
