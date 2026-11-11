@@ -170,6 +170,9 @@
         </p>
         <ul style="padding-left:1.25rem;line-height:1.75;margin-bottom:0;">
             <li><strong>Approve</strong> → becomes a regular item on the list</li>
+            <li>You can adjust the suggested <strong>quantity</strong> before deciding. If the suggester left an
+                email address, they are notified of the decision; you can add an optional message. The address is
+                deleted afterwards.</li>
             <li><strong>Reject</strong> → gets deleted</li>
         </ul>
     </div>
@@ -298,7 +301,9 @@
         <h3><i class="fa-solid fa-lightbulb" aria-hidden="true"></i> Suggesting your own item</h3>
         <p style="margin-bottom:0;">
             If the organizer has allowed it, a new item can be suggested at the bottom of the list (item name +
-            your name). The suggestion only appears in the public list once the organizer approves it.
+            your name, optionally a quantity). The suggestion only appears in the public list once the organizer
+            approves it. If you enter an email address, you will be notified of the decision (accepted or
+            declined, optionally with a message). The address is used only for this and deleted afterwards.
         </p>
     </div>
 

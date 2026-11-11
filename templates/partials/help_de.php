@@ -174,6 +174,9 @@
         <ul style="padding-left:1.25rem;line-height:1.75;margin-bottom:0;">
             <li><strong>Freigeben</strong> → wird zu einem normalen Mitbringsel in der Liste</li>
             <li><strong>Ablehnen</strong> → wird gelöscht</li>
+            <li>Die vorgeschlagene <strong>Anzahl</strong> kannst du vor der Entscheidung anpassen. Hat der
+                Vorschlagende eine E-Mail-Adresse angegeben, wird er über die Entscheidung informiert; du kannst
+                optional eine Mitteilung beifügen. Die Adresse wird danach gelöscht.</li>
         </ul>
     </div>
 
@@ -305,8 +308,10 @@
         <h3><i class="fa-solid fa-lightbulb" aria-hidden="true"></i> Einen eigenen Vorschlag machen</h3>
         <p style="margin-bottom:0;">
             Falls der Eventersteller es erlaubt hat, kann am Ende der Liste ein neues Mitbringsel vorgeschlagen
-            werden (Name + eigener Name). Der Vorschlag erscheint erst in der öffentlichen Liste, nachdem der
-            Eventersteller ihn freigegeben hat.
+            werden (Name + eigener Name, optional Anzahl). Der Vorschlag erscheint erst in der öffentlichen Liste,
+            nachdem der Eventersteller ihn freigegeben hat. Wer eine E-Mail-Adresse angibt, wird über die
+            Entscheidung (Annahme oder Ablehnung, ggf. mit Mitteilung) benachrichtigt. Die Adresse wird nur dafür
+            verwendet und danach gelöscht.
         </p>
     </div>
 

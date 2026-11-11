@@ -93,6 +93,9 @@ CREATE TABLE IF NOT EXISTS `items` (
     `sort_order`         INT DEFAULT 0,
     `status`             ENUM('approved','pending') DEFAULT 'approved',
     `suggested_by_guest` VARCHAR(100) NULL,
+    `suggester_email`    VARCHAR(255) NULL
+        COMMENT 'Optional: Benachrichtigung über die Entscheidung, wird nach Versand auf NULL gesetzt',
+    `suggester_locale`   VARCHAR(10) NULL,
     `created_at`         DATETIME DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT `fk_items_event` FOREIGN KEY (`event_id`) REFERENCES `events`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

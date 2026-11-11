@@ -13,6 +13,14 @@ upgrade.
 
 ### Added
 
+- Suggested items: guests can optionally add a quantity and an email
+  address. If an address is given, the suggester is notified by email
+  (in the language they used) when the organiser approves or rejects the
+  suggestion, with an optional message from the organiser. The address is
+  deleted once the decision is made. The organiser can adjust the quantity
+  when approving. Requires `migrations/003_suggestion_notify.sql` on
+  existing installations.
+
 - Event descriptions support a restricted Markdown subset (bold, italic,
   links, lists, line breaks). Raw HTML, images and non-http(s) links are
   rendered as plain text. Applies to the guest view, the management page

@@ -136,7 +136,14 @@ class ItemController
             abort(403);
         }
 
-        $db->update('items', ['status' => 'approved'], ['id' => $item['id']]);
+        $quantity = (int) ($_POST['quantity'] ?? $item['quantity']);
+        if ($quantity < 1 || $quantity > 999) {
+            flash('error', __('item.quantity') . ': Wert zwischen 1 und 999 erforderlich.');
+            redirect(base_url('e/' . $event['admin_token'] . '/manage'));
+        }
+
+        $db->update('items', ['status' => 'approved', 'quantity' => $quantity], ['id' => $item['id']]);
+        $this->notifySuggester($event, array_merge($item, ['quantity' => $quantity]), true);
 
         flash('success', '"' . $item['name'] . '" wurde freigegeben.');
         redirect(base_url('e/' . $event['admin_token'] . '/manage'));
@@ -157,6 +164,8 @@ class ItemController
             abort(403);
         }
 
+        // Notify before deleting; the address is gone with the row.
+        $this->notifySuggester($event, $item, false);
         $db->delete('items', ['id' => $item['id']]);
 
         flash('success', 'Vorschlag "' . $item['name'] . '" wurde abgelehnt und gelöscht.');
@@ -224,6 +233,53 @@ class ItemController
     // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------
+
+    /**
+     * Tell the suggester (if they left an address) how the organiser decided.
+     * Best-effort: a mail failure never blocks the organiser's action. The
+     * address is wiped afterwards; on rejection the row is deleted anyway.
+     */
+    private function notifySuggester(array $event, array $item, bool $approved): void
+    {
+        global $db;
+
+        $email = trim((string) ($item['suggester_email'] ?? ''));
+        if ($email === '') {
+            return;
+        }
+
+        $note = mb_substr(trim((string) ($_POST['message'] ?? '')), 0, 1000);
+
+        $available = available_languages();
+        $locale    = (string) ($item['suggester_locale'] ?? '');
+        $tr        = new Translator(isset($available[$locale]) ? $locale : 'de');
+        $t         = static fn(string $key, array $r = []): string => $tr->t($key, $r);
+
+        try {
+            $emailSettings = $db->fetch('SELECT * FROM email_settings LIMIT 1') ?: [];
+            $mailer        = new Mailer($emailSettings);
+            $html = Mailer::renderTemplate('suggestion_decision', [
+                'event'    => $event,
+                'item'     => $item,
+                'approved' => $approved,
+                'note'     => $note,
+                'guestUrl' => base_url('g/' . $event['guest_token']),
+                't'        => $t,
+                'locale'   => $tr->getLocale(),
+            ]);
+            @$mailer->send(
+                $email,
+                $t($approved ? 'mail.decision_subject_approved' : 'mail.decision_subject_rejected', ['name' => $item['name']]),
+                $html
+            );
+        } catch (\Throwable $e) {
+            error_log('Suggestion notification failed: ' . $e->getMessage());
+        }
+
+        if ($approved) {
+            $db->update('items', ['suggester_email' => null, 'suggester_locale' => null], ['id' => $item['id']]);
+        }
+    }
 
     private function loadEvent(string $adminToken): array
     {

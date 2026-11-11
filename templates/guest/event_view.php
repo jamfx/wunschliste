@@ -325,11 +325,28 @@ $progressPct = $progressTotal > 0
                        placeholder="<?= h(__('claim.guest_name_placeholder')) ?>"
                        maxlength="100" required>
             </div>
-            <button type="submit" class="btn btn-secondary btn-sm" style="margin-bottom:0;">
-                <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
-                <?= h(__('guest.suggest_submit')) ?>
-            </button>
+            <div class="form-group" style="width:90px;margin-bottom:0;">
+                <label class="form-label" style="font-size:.8125rem;" for="suggest_quantity">
+                    <?= h(__('guest.suggest_quantity')) ?>
+                </label>
+                <input class="form-input" type="number" id="suggest_quantity" name="quantity"
+                       value="1" min="1" max="999">
+            </div>
         </div>
+        <div class="form-group" style="margin:.5rem 0 0;">
+            <label class="form-label" style="font-size:.8125rem;" for="suggest_email">
+                <?= h(__('guest.suggest_email')) ?>
+            </label>
+            <input class="form-input" type="email" id="suggest_email" name="suggester_email"
+                   maxlength="255" autocomplete="email" style="max-width:360px;">
+            <span class="text-muted text-sm" style="display:block;margin-top:.25rem;">
+                <?= h(__('guest.suggest_email_hint')) ?>
+            </span>
+        </div>
+        <button type="submit" class="btn btn-secondary btn-sm" style="margin-top:.75rem;">
+            <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
+            <?= h(__('guest.suggest_submit')) ?>
+        </button>
     </form>
 </div>
 <?php endif; ?>

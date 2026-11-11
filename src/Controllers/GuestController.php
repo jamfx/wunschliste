@@ -265,6 +265,8 @@ class GuestController
         }
         $name       = trim($_POST['name']       ?? '');
         $guestName  = trim($_POST['guest_name'] ?? '');
+        $quantity   = (int) ($_POST['quantity'] ?? 1);
+        $email      = trim($_POST['suggester_email'] ?? '');
 
         if ($name === '') {
             flash('error', __('validation.required') . ' (' . __('guest.suggest_name') . ')');
@@ -272,6 +274,14 @@ class GuestController
         }
         if ($guestName === '') {
             flash('error', __('validation.required') . ' (' . __('claim.guest_name_label') . ')');
+            redirect(base_url('g/' . $guestToken));
+        }
+
+        if ($quantity < 1 || $quantity > 999) {
+            $quantity = 1;
+        }
+        if ($email !== '' && (mb_strlen($email) > 255 || !filter_var($email, FILTER_VALIDATE_EMAIL))) {
+            flash('error', __('guest.suggest_email_invalid'));
             redirect(base_url('g/' . $guestToken));
         }
 
@@ -288,10 +298,13 @@ class GuestController
         $db->insert('items', [
             'event_id'           => $event['id'],
             'name'               => $name,
-            'quantity'           => 1,
+            'quantity'           => $quantity,
             'sort_order'         => $sortOrder,
             'status'             => 'pending',
             'suggested_by_guest' => $guestName,
+            // Only kept until the organiser decides, see ItemController.
+            'suggester_email'    => $email !== '' ? $email : null,
+            'suggester_locale'   => $email !== '' ? $GLOBALS['translator']->getLocale() : null,
         ]);
 
         rate_limit_record('suggest');
@@ -302,7 +315,7 @@ class GuestController
             $mailer        = new Mailer($emailSettings);
             $html = Mailer::renderTemplate('item_suggested', [
                 'event'    => $event,
-                'item'     => ['name' => $name, 'suggested_by_guest' => $guestName],
+                'item'     => ['name' => $name, 'suggested_by_guest' => $guestName, 'quantity' => $quantity],
                 'adminUrl' => base_url('e/' . $event['admin_token'] . '/manage'),
             ]);
             @$mailer->send(

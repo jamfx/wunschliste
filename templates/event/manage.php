@@ -305,7 +305,7 @@ foreach ($approvedItems as $itemIndex => $item):
 
     <div class="item-list">
     <?php foreach ($pendingItems as $item): ?>
-    <div class="item-row" style="border-color:var(--warning);background:var(--warning-bg);">
+    <div class="item-row" style="border-color:var(--warning);background:var(--warning-bg);flex-wrap:wrap;">
         <div>
             <span class="item-name"><?= h($item['name']) ?></span>
             <?php if (!empty($item['suggested_by_guest'])): ?>
@@ -314,29 +314,43 @@ foreach ($approvedItems as $itemIndex => $item):
                 <?= h(__('item.suggested_by', ['name' => $item['suggested_by_guest']])) ?>
             </span>
             <?php endif; ?>
+            <?php if (!empty($item['suggester_email'])): ?>
+            <span class="text-sm text-muted" style="display:block;">
+                <i class="fa-solid fa-envelope" aria-hidden="true"></i>
+                <?= h(__('item.suggester_will_be_notified')) ?>
+            </span>
+            <?php endif; ?>
         </div>
 
-        <div class="item-actions" style="margin-left:auto;">
-            <form method="post"
-                  action="<?= h(base_url('e/' . $adminToken . '/items/' . $item['id'] . '/approve')) ?>"
-                  style="display:inline;">
-                <?= csrf_field() ?>
-                <button type="submit" class="btn btn-success btn-sm">
+        <?php $decisionFormId = 'decision-' . (int) $item['id']; ?>
+        <form id="<?= h($decisionFormId) ?>" method="post" style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:flex-end;margin-left:auto;">
+            <?= csrf_field() ?>
+            <div>
+                <label class="text-sm text-muted" for="<?= h($decisionFormId) ?>-qty"><?= h(__('item.quantity')) ?></label>
+                <input class="form-input" type="number" id="<?= h($decisionFormId) ?>-qty" name="quantity"
+                       value="<?= (int) $item['quantity'] ?>" min="1" max="999" style="width:80px;">
+            </div>
+            <?php if (!empty($item['suggester_email'])): ?>
+            <div style="flex:1;min-width:200px;">
+                <label class="text-sm text-muted" for="<?= h($decisionFormId) ?>-msg"><?= h(__('item.decision_message')) ?></label>
+                <input class="form-input" type="text" id="<?= h($decisionFormId) ?>-msg" name="message"
+                       maxlength="1000" placeholder="<?= h(__('item.decision_message_placeholder')) ?>">
+            </div>
+            <?php endif; ?>
+            <div class="item-actions">
+                <button type="submit" class="btn btn-success btn-sm"
+                        formaction="<?= h(base_url('e/' . $adminToken . '/items/' . $item['id'] . '/approve')) ?>">
                     <i class="fa-solid fa-check" aria-hidden="true"></i>
                     <?= h(__('item.approve')) ?>
                 </button>
-            </form>
-            <form method="post"
-                  action="<?= h(base_url('e/' . $adminToken . '/items/' . $item['id'] . '/reject')) ?>"
-                  style="display:inline;">
-                <?= csrf_field() ?>
                 <button type="submit" class="btn btn-danger btn-sm"
+                        formaction="<?= h(base_url('e/' . $adminToken . '/items/' . $item['id'] . '/reject')) ?>"
                         data-confirm="Vorschlag &quot;<?= h($item['name']) ?>&quot; ablehnen und löschen?">
                     <i class="fa-solid fa-xmark" aria-hidden="true"></i>
                     <?= h(__('item.reject')) ?>
                 </button>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
     <?php endforeach; ?>
     </div>

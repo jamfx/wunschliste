@@ -3,6 +3,12 @@
 <a id="deutsch"></a>
 # Upgrade-Anleitung
 
+## Upgrade auf die Version nach 1.1.0 (Vorschlags-Benachrichtigung)
+
+Neue Funktion: Gäste können bei Mitbringsel-Vorschlägen optional Anzahl und E-Mail-Adresse angeben und werden über die Entscheidung benachrichtigt. Nach dem Hochladen der Dateien **einmalig** `migrations/003_suggestion_notify.sql` gegen die bestehende Datenbank ausführen (phpMyAdmin oder `mysql -h DB_HOST -u DB_USER -p DB_NAME < migrations/003_suggestion_notify.sql`). Zweimaliges Ausführen schlägt fehl (Spalten existieren bereits). Neuinstallationen brauchen nichts zu tun.
+
+---
+
 ## Upgrade auf 1.1.0
 
 Version 1.1.0 führt Benutzerkonten ein (SuperAdmin lädt registrierte User per E-Mail ein, optionale 2FA für jeden Account), Listen-Besitzer sowie einen Schalter, mit dem die Listen-Erstellung auf registrierte User beschränkt werden kann. Das Upgrade ist **abwärtskompatibel**: im Standardzustand ("Offen für alle") verhält sich eine bestehende Installation nach dem Upgrade exakt wie vorher — bestehende Listen bleiben unverändert nur über ihren Admin-Link erreichbar, ohne Login.
@@ -61,6 +67,12 @@ Nichts davon ist für den Betrieb erforderlich — die Installation läuft nach 
 
 <a id="english"></a>
 # Upgrade Guide (English)
+
+## Upgrading to the version after 1.1.0 (suggestion notifications)
+
+New feature: guests can optionally add a quantity and an email address to suggested items and are notified of the decision. After uploading the files, run `migrations/003_suggestion_notify.sql` **once** against the existing database (phpMyAdmin or `mysql -h DB_HOST -u DB_USER -p DB_NAME < migrations/003_suggestion_notify.sql`). Running it twice fails (columns already exist). Fresh installs need no action.
+
+---
 
 ## Upgrading to 1.1.0
 
