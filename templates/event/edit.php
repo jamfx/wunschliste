@@ -24,7 +24,7 @@ $adminToken         = $event['admin_token'];
 $hasAccessPassword  = !empty($event['access_password_hash']);
 ?>
 
-<div style="max-width:640px;margin-inline:auto;">
+<div class="content-medium">
 
     <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;">
         <a href="<?= h(base_url('e/' . $adminToken . '/manage')) ?>"

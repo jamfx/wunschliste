@@ -5,7 +5,7 @@
  */
 ?>
 
-<div style="max-width:620px;margin-inline:auto;">
+<div class="content-medium">
 
     <div class="alert alert-success" style="font-size:1.0625rem;">
         <i class="fa-solid fa-circle-check" aria-hidden="true"></i>

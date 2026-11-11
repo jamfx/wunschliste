@@ -67,7 +67,7 @@ $flashMessages = get_flash();
 <!-- Navigation                                                        -->
 <!-- ================================================================ -->
 <nav class="nav" role="navigation" aria-label="<?= h(__('app.title')) ?>">
-    <div class="container nav-inner">
+    <div class="container nav-inner <?= h($containerClass ?? '') ?>">
         <a href="<?= h(base_url()) ?>" class="nav-brand" aria-label="<?= h(__('app.title')) ?>">
             <?php if (!empty($logoPath)): ?>
                 <img src="<?= h(base_url($logoPath)) ?>"
@@ -108,7 +108,7 @@ $flashMessages = get_flash();
 <!-- Footer                                                            -->
 <!-- ================================================================ -->
 <footer class="footer" role="contentinfo">
-    <div class="container">
+    <div class="container <?= h($containerClass ?? '') ?>">
         <span class="text-muted text-sm">&copy; <?= date('Y') ?> <?= h($siteTitle) ?></span>
 
         <a href="<?= h(base_url('hilfe')) ?>">

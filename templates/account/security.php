@@ -14,7 +14,7 @@
  */
 $backUrl = base_url(($_SESSION['user_role'] ?? '') === 'superadmin' ? 'admin/dashboard' : 'my/lists');
 ?>
-<div style="max-width:640px;margin-inline:auto;">
+<div class="content-medium">
 
     <div style="margin-bottom:.75rem;">
         <a href="<?= h($backUrl) ?>" class="text-sm" style="color:var(--text-muted);">

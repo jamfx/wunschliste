@@ -1,5 +1,5 @@
 <?php $claimDelayMinutes = (int) round(claim_finalize_delay_seconds() / 60); ?>
-<div style="max-width:760px;margin-inline:auto;">
+<div class="content-medium">
 
     <h1 style="margin-bottom:.5rem;">
         <i class="fa-solid fa-circle-question" aria-hidden="true" style="color:var(--primary-color);margin-right:.4rem;"></i>

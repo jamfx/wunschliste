@@ -72,7 +72,7 @@ p:last-child { margin-bottom: 0; }
 /* --- Layout ------------------------------------------------ */
 .container {
     width: 100%;
-    max-width: 800px;
+    max-width: 960px;
     margin-inline: auto;
     padding-inline: 1rem;
 }
@@ -81,8 +81,17 @@ p:last-child { margin-bottom: 0; }
     /* Scales with the viewport instead of a fixed width, so wide-column
        tables (dashboard, user list) get the room they need on wide screens
        without leaving large unused margins — while still capping growth on
-       ultra-wide monitors and never exceeding the viewport itself. */
+       ultra-wide monitors and never exceeding the viewport itself. Also
+       applied to the header and footer on these pages (see layout.php) so
+       everything lines up. */
     max-width: min(96vw, 1600px);
+}
+
+.content-medium {
+    /* Shared width for form-like / reading pages (create, edit, created,
+       help, "my security"). Login-style screens stay narrower on purpose. */
+    max-width: 800px;
+    margin-inline: auto;
 }
 
 main.container {
