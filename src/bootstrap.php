@@ -10,7 +10,7 @@ if (!defined('CONFIG_PATH')) {
 }
 
 // Bump on every release (see UPGRADE.md); shown in the public footer.
-define('APP_VERSION', '1.3.0');
+define('APP_VERSION', '1.3.1');
 
 // Gift Mode (Geschenkmodus) tuning constants
 define('GIFT_MODE_HEARTBEAT_INTERVAL_MS', 30000);  // JS heartbeat interval

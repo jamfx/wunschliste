@@ -2,7 +2,7 @@
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](LICENSE.txt)
 ![PHP](https://img.shields.io/badge/PHP-%3E%3D8.1-777bb4.svg)
-![Version](https://img.shields.io/badge/Version-1.3.0-orange.svg)
+![Version](https://img.shields.io/badge/Version-1.3.1-orange.svg)
 
 <a id="deutsch"></a>
 # Wunschliste
@@ -116,5 +116,6 @@ This project bundles the following third-party libraries, each under its own lic
 - [masterminds/html5](https://github.com/Masterminds/html5-php) — MIT
 - [sabberworm/php-css-parser](https://github.com/sabberworm/PHP-CSS-Parser) — MIT
 - [thecodingmachine/safe](https://github.com/thecodingmachine/safe) — MIT
+- [Twemoji](https://github.com/jdecked/twemoji) 15.1.0 — a selection of 200 emoji graphics for the PDF export (`assets/emoji/`): [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/), Copyright 2020 Twitter, Inc and other contributors
 - [ALTCHA widget](https://github.com/altcha-org/altcha) 3.4.1 (`assets/js/altcha/`) — MIT
 - [altcha-org/altcha PHP library](https://github.com/altcha-org/altcha-lib-php) 2.3.0 (`vendor/altcha-org/altcha/`) — MIT

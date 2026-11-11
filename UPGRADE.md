@@ -11,6 +11,12 @@ Bei jedem Update die Dateien der neuen Version über die bestehende Installation
 - Prüfe den Ordner `migrations/` auf dem Server: Er darf nur Dateien der aktuellen Version enthalten (plus die `.htaccess`). Dateien, die nicht dazugehören – etwa Reste früherer Entwicklungsstände –, werden vom Migrator als „ausstehend“ angezeigt. In diesem Fall **nicht** ausführen, sondern die Dateien löschen.
 - Migrationsdateien niemals umbenennen: eine umbenannte Datei gilt als neu und würde erneut ausgeführt.
 
+## Upgrade auf 1.3.1 (PDF-Export mit Emojis)
+
+Nur Dateien kopieren, **keine Migration** nötig. Wichtig: den neuen Ordner `assets/emoji/` (200 Grafiken) mit hochladen, sonst werden Emojis im PDF weggelassen.
+
+---
+
 ## Upgrade auf 1.3.0 (Zusage bei Vorschlägen, übersetzte Texte)
 
 Alle Dateien der neuen Version über die bestehende Installation kopieren (Ordner `vendor/` und `migrations/` vollständig, nur Dateien dieser Version), danach als SuperAdmin unter **Admin → Datenbank-Update** die Migration `004_suggester_claim.sql` einspielen (der Hinweis erscheint auf dem Dashboard). Wichtig: Spiele die Migration direkt nach dem Hochladen ein – solange sie fehlt, schlägt das Absenden eines Vorschlags **mit gesetztem Häkchen „Ich bringe das auch mit“** fehl.
@@ -93,6 +99,12 @@ For every update, copy the files of the new version over the existing installati
 - Not all SQL steps are re-run on every update. Each migration file runs exactly once and is recorded in the `migrations` table; only files that are new are pending.
 - Check the `migrations/` folder on the server: it must contain only files of the current version (plus the `.htaccess`). Files that do not belong there – e.g. leftovers from earlier development states – are shown as "pending" by the migrator. In that case do **not** run them; delete the files instead.
 - Never rename migration files: a renamed file counts as new and would be run again.
+
+## Upgrading to 1.3.1 (PDF export with emoji)
+
+Just copy the files, **no migration** needed. Important: also upload the new folder `assets/emoji/` (200 graphics), otherwise emoji are left out of the PDF.
+
+---
 
 ## Upgrading to 1.3.0 (pledges on suggestions, translated texts)
 

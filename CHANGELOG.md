@@ -11,6 +11,15 @@ upgrade.
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-11-11
+
+### Fixed
+
+- PDF export: emoji no longer appear as empty boxes. The 200 most common
+  emoji are drawn as small colour images (Twemoji, `assets/emoji/`, CC-BY 4.0,
+  credited in the README); other emoji are left out of the PDF. The web view
+  is unchanged.
+
 ## [1.3.0] - 2026-11-11
 
 ### Added
