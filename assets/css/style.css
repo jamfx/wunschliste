@@ -793,3 +793,15 @@ legend {
 @media (max-width: 600px) {
     .event-pdf-btn { float: none; display: inline-flex; margin: 0 0 .75rem; }
 }
+
+/* --- ALTCHA widget: follow the site's design (primary colour is set in layout.php from the DB) --- */
+altcha-widget {
+    --altcha-color-primary: var(--primary-color);
+    --altcha-color-primary-content: #ffffff;
+    /* "Verified" state in the brand colour too (still conveyed by the tick and the text, not by colour alone) */
+    --altcha-color-success: var(--primary-color);
+    --altcha-color-success-content: #ffffff;
+    --altcha-border-radius: var(--radius-sm);
+    /* Brand-coloured frame; dark enough to meet 3:1 contrast (WCAG 1.4.11) */
+    --altcha-border-color: var(--primary-color);
+}

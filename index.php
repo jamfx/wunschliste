@@ -18,6 +18,7 @@ require_once BASE_DIR . '/src/Controllers/AccountController.php';
 require_once BASE_DIR . '/src/Controllers/AccountSecurityController.php';
 require_once BASE_DIR . '/src/Controllers/PdfExportController.php';
 require_once BASE_DIR . '/src/Controllers/PageController.php';
+require_once BASE_DIR . '/src/Controllers/AltchaController.php';
 
 $router = new Router();
 
@@ -57,6 +58,7 @@ $router->post('/g/{guest_token}/claim',            [GuestController::class,     
 $router->post('/g/{guest_token}/claim/{claim_id}/undo', [GuestController::class, 'undoClaim']);
 $router->post('/g/{guest_token}/heartbeat',        [GuestController::class,     'heartbeat']);
 $router->post('/g/{guest_token}/suggest',          [GuestController::class,     'suggest']);
+$router->get('/altcha/challenge',                  [AltchaController::class,    'challenge']);
 $router->get('/g/{guest_token}/pdf',               [PdfExportController::class, 'guestPdf']);
 
 // -----------------------------------------------------------------------

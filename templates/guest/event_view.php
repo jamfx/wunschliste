@@ -309,6 +309,7 @@ $progressPct = $progressTotal > 0
 
     <form method="post" action="<?= h(base_url('g/' . $guestToken . '/suggest')) ?>">
         <?= csrf_field() ?>
+        <?= form_timing_field('suggest') ?>
         <div style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:flex-end;">
             <div class="form-group" style="flex:1;min-width:150px;margin-bottom:0;">
                 <label class="form-label" style="font-size:.8125rem;" for="suggest_name">
@@ -343,6 +344,7 @@ $progressPct = $progressTotal > 0
                 <?= h(__('guest.suggest_email_hint')) ?>
             </span>
         </div>
+        <?php $altchaForm = 'suggest'; include BASE_DIR . '/templates/partials/altcha_widget.php'; ?>
         <button type="submit" class="btn btn-secondary btn-sm" style="margin-top:.75rem;">
             <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
             <?= h(__('guest.suggest_submit')) ?>

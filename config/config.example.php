@@ -22,4 +22,9 @@ $config = [
     // Zufälliges Geheimnis für CSRF und Sessions (wird bei Installation automatisch generiert)
     // Mindestens 64 Zeichen, zufällig, niemals teilen.
     'app_secret' => 'HIER_ZUFAELLIGES_64_ZEICHEN_GEHEIMNIS_EINTRAGEN',
+
+    // Optional: IP-Adressen vorgeschalteter Reverse-Proxys/CDNs. Nur wenn die
+    // Anfrage von einer dieser Adressen kommt, wird X-Forwarded-For für die
+    // Rate-Limits ausgewertet. Ohne Proxy leer lassen bzw. weglassen.
+    // 'trusted_proxies' => ['203.0.113.10'],
 ];

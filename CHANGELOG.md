@@ -11,7 +11,26 @@ upgrade.
 
 ## [Unreleased]
 
+### Security
+
+- Rate limits no longer trust forgeable `X-Forwarded-For` /
+  `CF-Connecting-IP` headers: `client_ip()` uses `REMOTE_ADDR`. Behind a
+  reverse proxy, list it under `trusted_proxies` in `config/config.php`.
+
 ### Added
+
+- Optional proof-of-work captcha ([ALTCHA](https://altcha.org) v3, MIT,
+  self-hosted, no cookies, no external requests) for "create list" and
+  "suggest an item". Admin → Security: three levels (off / normal / high),
+  default off. Accessible messages for missing JavaScript, unsupported
+  browsers, expired or failed checks. Challenges are signed (HMAC) and
+  single-use. New files: `assets/js/altcha/`, `vendor/altcha-org/altcha/`,
+  `src/AltchaGuard.php`, `src/Controllers/AltchaController.php`,
+  `templates/partials/altcha_widget.php`. No database migration needed.
+- Spam protection for the public forms "create list" and "suggest an
+  item": configurable minimum fill time (HMAC-signed timestamp, default
+  5 s, 0 = off, admin → Security) and rejection of links/HTML in list
+  titles, item names and guest names.
 
 - Suggested items: guests can optionally add a quantity and an email
   address. If an address is given, the suggester is notified by email

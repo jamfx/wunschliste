@@ -130,6 +130,41 @@
                     </div>
                 </div>
 
+                <!-- Mindest-Ausfüllzeit -->
+                <p style="font-weight:600;font-size:.9rem;margin-bottom:.625rem;border-bottom:1px solid var(--border);padding-bottom:.375rem;">
+                    <i class="fa-solid fa-hourglass-half" aria-hidden="true"></i>
+                    <?= h(__('admin.form_timing_section')) ?>
+                </p>
+                <div class="form-group" style="margin-bottom:1.25rem;">
+                    <label class="form-label" for="form_min_fill_seconds"><?= h(__('admin.form_timing_label')) ?></label>
+                    <div style="display:flex;align-items:center;gap:.5rem;">
+                        <input class="form-input" type="number" id="form_min_fill_seconds"
+                               name="form_min_fill_seconds"
+                               value="<?= (int) ($s['form_min_fill_seconds'] ?? 5) ?>"
+                               min="0" max="60" style="width:5.5rem;">
+                        <span class="text-muted text-sm"><?= h(__('admin.rate_unit_seconds')) ?></span>
+                    </div>
+                    <span class="text-muted text-sm" style="display:block;margin-top:.25rem;"><?= h(__('admin.form_timing_hint')) ?></span>
+                </div>
+
+                <!-- Proof-of-Work (ALTCHA) -->
+                <p style="font-weight:600;font-size:.9rem;margin-bottom:.625rem;border-bottom:1px solid var(--border);padding-bottom:.375rem;">
+                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                    <?= h(__('admin.altcha_section')) ?>
+                </p>
+                <div class="form-group" style="margin-bottom:1.25rem;">
+                    <label class="form-label" for="altcha_level"><?= h(__('admin.altcha_label')) ?></label>
+                    <?php $altchaCurrent = (string) ($s['altcha_level'] ?? 'off'); ?>
+                    <select class="form-input" id="altcha_level" name="altcha_level" style="max-width:22rem;">
+                        <?php foreach (['off', 'normal', 'high'] as $lvl): ?>
+                        <option value="<?= h($lvl) ?>" <?= $altchaCurrent === $lvl ? 'selected' : '' ?>>
+                            <?= h(__('admin.altcha_level_' . $lvl)) ?>
+                        </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <span class="text-muted text-sm" style="display:block;margin-top:.25rem;"><?= h(__('admin.altcha_hint')) ?></span>
+                </div>
+
                 <button type="submit" class="btn btn-primary">
                     <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
                     <?= h(__('common.save')) ?>

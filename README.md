@@ -108,3 +108,5 @@ This project bundles the following third-party libraries, each under its own lic
 - [masterminds/html5](https://github.com/Masterminds/html5-php) — MIT
 - [sabberworm/php-css-parser](https://github.com/sabberworm/PHP-CSS-Parser) — MIT
 - [thecodingmachine/safe](https://github.com/thecodingmachine/safe) — MIT
+- [ALTCHA widget](https://github.com/altcha-org/altcha) 3.4.1 (`assets/js/altcha/`) — MIT
+- [altcha-org/altcha PHP library](https://github.com/altcha-org/altcha-lib-php) 2.3.0 (`vendor/altcha-org/altcha/`) — MIT

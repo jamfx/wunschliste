@@ -51,6 +51,7 @@ $v = [
 
     <form method="post" action="<?= h(base_url()) ?>" novalidate data-optional-email-check>
         <?= csrf_field() ?>
+        <?= form_timing_field('create_event') ?>
 
         <!-- Core fields -->
         <div class="card">
@@ -166,7 +167,9 @@ $v = [
             </div>
         </details>
 
-        <button type="submit" class="btn btn-primary btn-full" style="font-size:1.0625rem;padding:.8rem;">
+        <?php $altchaForm = 'create_event'; include BASE_DIR . '/templates/partials/altcha_widget.php'; ?>
+
+        <button type="submit" class="btn btn-primary btn-full" style="font-size:1.0625rem;padding:.8rem;margin-top:1rem;">
             <i class="fa-solid fa-rocket" aria-hidden="true"></i>
             <?= h(__('event.submit_create')) ?>
         </button>

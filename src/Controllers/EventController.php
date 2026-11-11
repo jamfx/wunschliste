@@ -73,6 +73,14 @@ class EventController
             $errors[] = $passwordError;
         }
 
+        if (!form_timing_ok('create_event')) {
+            $errors[] = __('validation.too_fast');
+        }
+
+        if (empty($errors) && ($altchaError = AltchaGuard::verify('create_event')) !== null) {
+            $errors[] = __($altchaError);
+        }
+
         if (empty($errors)) {
             // Rate limiting: limits configurable in admin security settings
             $rlMax    = max(1, (int) ($db->fetch("SELECT setting_value FROM site_settings WHERE setting_key='rate_event_max_count'")['setting_value'] ?? 10));
@@ -411,6 +419,8 @@ class EventController
             $errors[] = __('validation.required') . ' (' . __('event.title_label') . ')';
         } elseif (mb_strlen($data['title']) > 255) {
             $errors[] = __('event.title_label') . ': Maximal 255 Zeichen.';
+        } elseif (looks_like_link_spam($data['title'])) {
+            $errors[] = __('event.title_label') . ': ' . __('validation.no_links');
         }
 
         if (mb_strlen($data['description'] ?? '') > 5000) {

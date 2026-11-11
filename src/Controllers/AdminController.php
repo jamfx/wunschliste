@@ -915,6 +915,9 @@ class AdminController
             $this->saveSiteSetting('rate_login_window_minutes',(string) max(1, min(60,   (int) ($_POST['rate_login_window_minutes'] ?? 15))));
             $this->saveSiteSetting('rate_event_max_count',     (string) max(1, min(100,  (int) ($_POST['rate_event_max_count']     ?? 10))));
             $this->saveSiteSetting('rate_event_window_minutes',(string) max(1, min(1440, (int) ($_POST['rate_event_window_minutes'] ?? 60))));
+            $this->saveSiteSetting('form_min_fill_seconds',    (string) max(0, min(60,   (int) ($_POST['form_min_fill_seconds']    ?? 5))));
+            $altchaLevel = (string) ($_POST['altcha_level'] ?? 'off');
+            $this->saveSiteSetting('altcha_level', in_array($altchaLevel, ['off', 'normal', 'high'], true) ? $altchaLevel : 'off');
             flash('success', __('admin.rate_limits_saved'));
             redirect(base_url('admin/settings/security'));
         }

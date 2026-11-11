@@ -30,7 +30,21 @@ if (file_exists($_composerAutoload)) {
 }
 unset($_composerAutoload);
 
+// ALTCHA PHP library (vendored under vendor/altcha-org/altcha, MIT). Registered
+// explicitly so it works independently of Composer's generated autoload files.
+spl_autoload_register(static function (string $class): void {
+    $prefix = 'AltchaOrg\\Altcha\\';
+    if (strncmp($class, $prefix, strlen($prefix)) !== 0) {
+        return;
+    }
+    $file = BASE_DIR . '/vendor/altcha-org/altcha/src/' . str_replace('\\', '/', substr($class, strlen($prefix))) . '.php';
+    if (is_file($file)) {
+        require $file;
+    }
+});
+
 require_once BASE_DIR . '/src/Database.php';
+require_once BASE_DIR . '/src/AltchaGuard.php';
 require_once BASE_DIR . '/src/Router.php';
 require_once BASE_DIR . '/src/Translator.php';
 require_once BASE_DIR . '/src/Totp.php';
@@ -283,6 +297,87 @@ function csrf_verify(): bool
 {
     $token = $_POST['csrf_token'] ?? '';
     return !empty($token) && hash_equals($_SESSION['csrf_token'], $token);
+}
+
+/** Integer value from site_settings (cached per request), or $default. */
+function site_setting_int(string $key, int $default): int
+{
+    global $db;
+    static $cache = [];
+    if (array_key_exists($key, $cache)) {
+        return $cache[$key];
+    }
+    $cache[$key] = $default;
+    if ($db !== null) {
+        try {
+            $row = $db->fetch('SELECT setting_value FROM site_settings WHERE setting_key = ? LIMIT 1', [$key]);
+            if ($row !== null && $row !== false && $row['setting_value'] !== '' && is_numeric($row['setting_value'])) {
+                $cache[$key] = (int) $row['setting_value'];
+            }
+        } catch (PDOException) {
+            // keep default
+        }
+    }
+    return $cache[$key];
+}
+
+/** Minimum seconds between rendering and submitting a public form (0 = off). */
+function form_min_fill_seconds(): int
+{
+    return max(0, min(60, site_setting_int('form_min_fill_seconds', 5)));
+}
+
+function form_timing_key(): string
+{
+    global $config;
+    $secret = (string) ($config['app_secret'] ?? '');
+    if ($secret === '' || str_starts_with($secret, 'HIER_')) {
+        $secret = hash('sha256', serialize($config ?? []));
+    }
+    return $secret;
+}
+
+/** Hidden field carrying an HMAC-signed render timestamp for the given form. */
+function form_timing_field(string $form): string
+{
+    $ts  = time();
+    $sig = hash_hmac('sha256', $form . '|' . $ts, form_timing_key());
+    return '<input type="hidden" name="ft" value="' . h($ts . '.' . $sig) . '">';
+}
+
+/**
+ * True if the form was open for at least the configured minimum time.
+ * Missing, forged or ancient (>24 h) tokens fail; with the setting at 0
+ * the check is disabled entirely.
+ */
+function form_timing_ok(string $form): bool
+{
+    $min = form_min_fill_seconds();
+    if ($min === 0) {
+        return true;
+    }
+    $parts = explode('.', (string) ($_POST['ft'] ?? ''), 2);
+    if (count($parts) !== 2 || !ctype_digit($parts[0])) {
+        return false;
+    }
+    $expected = hash_hmac('sha256', $form . '|' . $parts[0], form_timing_key());
+    if (!hash_equals($expected, $parts[1])) {
+        return false;
+    }
+    $age = time() - (int) $parts[0];
+    return $age >= $min && $age <= 86400;
+}
+
+/**
+ * Heuristic for link spam in short free-text fields (titles, item names).
+ * Deliberately not applied to descriptions, which may contain Markdown links.
+ */
+function looks_like_link_spam(string $text): bool
+{
+    return (bool) preg_match(
+        '~https?:|www\.|[<>]|\b[a-z0-9-]+\.(?:com|net|org|info|biz|cc|ru|xyz|top|click|shop|online|site|link)\b~iu',
+        $text
+    );
 }
 
 function redirect(string $url, int $code = 302): void
@@ -839,15 +934,38 @@ function split_sql_statements(string $sql): array
     return $statements;
 }
 
-/** Best-effort client IP (first trusted value found). */
+/**
+ * Client IP for rate limiting.
+ *
+ * Only REMOTE_ADDR is trusted by default: X-Forwarded-For & co. are plain
+ * request headers that any client can forge, which would let a bot dodge
+ * every IP-based limit by sending a random value per request. Behind a
+ * reverse proxy / CDN, list its address(es) in config.php as
+ * 'trusted_proxies' => ['203.0.113.10', ...]; the forwarded chain is then
+ * evaluated from the right, skipping trusted proxies.
+ */
 function client_ip(): string
 {
-    foreach (['HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR'] as $key) {
-        if (!empty($_SERVER[$key])) {
-            return trim(explode(',', $_SERVER[$key])[0]);
+    global $config;
+
+    $remote = trim((string) ($_SERVER['REMOTE_ADDR'] ?? ''));
+    if ($remote === '') {
+        return '0.0.0.0';
+    }
+
+    $trusted = is_array($config['trusted_proxies'] ?? null) ? $config['trusted_proxies'] : [];
+    if ($trusted === [] || !in_array($remote, $trusted, true)) {
+        return $remote;
+    }
+
+    $header = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? '');
+    $chain  = array_map('trim', explode(',', (string) $header));
+    foreach (array_reverse($chain) as $ip) {
+        if ($ip !== '' && !in_array($ip, $trusted, true) && filter_var($ip, FILTER_VALIDATE_IP)) {
+            return $ip;
         }
     }
-    return '0.0.0.0';
+    return $remote;
 }
 
 /**

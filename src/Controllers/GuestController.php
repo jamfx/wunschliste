@@ -259,6 +259,16 @@ class GuestController
 
         $guestToken = $event['guest_token'];
 
+        if (!form_timing_ok('suggest')) {
+            flash('error', __('validation.too_fast'));
+            redirect(base_url('g/' . $guestToken));
+        }
+
+        if (($altchaError = AltchaGuard::verify('suggest')) !== null) {
+            flash('error', __($altchaError));
+            redirect(base_url('g/' . $guestToken));
+        }
+
         if (!rate_limit_check('suggest', 10, 3600)) {
             flash('error', __('validation.rate_limit'));
             redirect(base_url('g/' . $guestToken));
@@ -277,6 +287,10 @@ class GuestController
             redirect(base_url('g/' . $guestToken));
         }
 
+        if (looks_like_link_spam($name) || looks_like_link_spam($guestName)) {
+            flash('error', __('validation.no_links'));
+            redirect(base_url('g/' . $guestToken));
+        }
         if ($quantity < 1 || $quantity > 999) {
             $quantity = 1;
         }

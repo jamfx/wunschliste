@@ -7,6 +7,8 @@
 
 Neue Funktion: Gäste können bei Mitbringsel-Vorschlägen optional Anzahl und E-Mail-Adresse angeben und werden über die Entscheidung benachrichtigt. Nach dem Hochladen der Dateien **einmalig** `migrations/003_suggestion_notify.sql` gegen die bestehende Datenbank ausführen (phpMyAdmin oder `mysql -h DB_HOST -u DB_USER -p DB_NAME < migrations/003_suggestion_notify.sql`). Zweimaliges Ausführen schlägt fehl (Spalten existieren bereits). Neuinstallationen brauchen nichts zu tun.
 
+Außerdem neu: optionaler Proof-of-Work-Spam-Schutz (ALTCHA). Dafür zusätzlich die Ordner `assets/js/altcha/` und `vendor/altcha-org/` **vollständig** hochladen. Aktivierung im Admin-Bereich unter Sicherheit (Standard: aus). Ohne diese Ordner schlägt die Prüfung fehl, sobald die Funktion eingeschaltet wird.
+
 ---
 
 ## Upgrade auf 1.1.0
