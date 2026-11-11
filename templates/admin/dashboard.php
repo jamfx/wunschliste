@@ -14,6 +14,14 @@
             <?= h(__('admin.dashboard_title')) ?>
         </h1>
 
+        <?php if (!empty($pendingMigrations)): ?>
+        <div class="alert alert-warning" role="alert" style="margin-bottom:1.25rem;">
+            <i class="fa-solid fa-database" aria-hidden="true"></i>
+            <?= h(__('admin.db_banner', ['count' => (int) $pendingMigrations])) ?>
+            <a href="<?= h(base_url('admin/settings/database')) ?>"><?= h(__('admin.db_banner_link')) ?></a>
+        </div>
+        <?php endif; ?>
+
         <!-- Stats row -->
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1.5rem;">
             <div class="card" style="text-align:center;padding:1rem;">

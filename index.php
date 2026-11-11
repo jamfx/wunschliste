@@ -113,6 +113,8 @@ $router->get('/admin/settings/security',           [AdminController::class,     
 $router->post('/admin/settings/security',          [AdminController::class,     'saveSecuritySettings']);
 $router->get('/admin/settings/cleanup',            [AdminController::class,     'cleanupSettings']);
 $router->post('/admin/settings/cleanup',           [AdminController::class,     'saveCleanupSettings']);
+$router->get('/admin/settings/database',           [AdminController::class,     'databaseSettings']);
+$router->post('/admin/settings/database',          [AdminController::class,     'runMigrations']);
 // Login-time passkey verification stays here — it runs before a session exists.
 $router->post('/admin/settings/2fa/passkey-auth',  [AdminController::class,     'passkeyAuthApi']);
 

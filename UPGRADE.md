@@ -3,9 +3,17 @@
 <a id="deutsch"></a>
 # Upgrade-Anleitung
 
-## Upgrade auf die Version nach 1.1.0 (Vorschlags-Benachrichtigung)
+## Allgemein: Update per Drüberkopieren
 
-Neue Funktion: Gäste können bei Mitbringsel-Vorschlägen optional Anzahl und E-Mail-Adresse angeben und werden über die Entscheidung benachrichtigt. Nach dem Hochladen der Dateien **einmalig** `migrations/003_suggestion_notify.sql` gegen die bestehende Datenbank ausführen (phpMyAdmin oder `mysql -h DB_HOST -u DB_USER -p DB_NAME < migrations/003_suggestion_notify.sql`). Zweimaliges Ausführen schlägt fehl (Spalten existieren bereits). Neuinstallationen brauchen nichts zu tun.
+Bei jedem Update die Dateien der neuen Version über die bestehende Installation kopieren (`config/config.php` und `uploads/` bleiben unberührt) und danach als SuperAdmin unter **Admin → Datenbank-Update** auf „Migrationen jetzt ausführen“ klicken, falls dort etwas aussteht.
+
+- Es werden **nicht** bei jedem Update alle SQL-Schritte erneut ausgeführt. Jede Migrationsdatei läuft genau einmal und wird in der Tabelle `migrations` vermerkt; ausstehend ist nur, was neu hinzugekommen ist.
+- Prüfe den Ordner `migrations/` auf dem Server: Er darf nur Dateien der aktuellen Version enthalten (plus die `.htaccess`). Dateien, die nicht dazugehören – etwa Reste früherer Entwicklungsstände –, werden vom Migrator als „ausstehend“ angezeigt. In diesem Fall **nicht** ausführen, sondern die Dateien löschen.
+- Migrationsdateien niemals umbenennen: eine umbenannte Datei gilt als neu und würde erneut ausgeführt.
+
+## Upgrade auf 1.2.0 (Vorschlags-Benachrichtigung, Spam-Schutz, Datenbank-Update)
+
+Neue Funktion: Gäste können bei Mitbringsel-Vorschlägen optional Anzahl und E-Mail-Adresse angeben und werden über die Entscheidung benachrichtigt. Nach dem Hochladen der Dateien als SuperAdmin einloggen und unter **Admin → Datenbank-Update** auf „Migrationen jetzt ausführen“ klicken (vorher ein Datenbank-Backup anlegen). Auf dem Dashboard weist ein Hinweis darauf hin, solange Migrationen ausstehen. Die SQL-Dateien müssen dafür nicht mehr von Hand eingespielt werden (die manuelle Variante per phpMyAdmin/`mysql` bleibt aber möglich, solange du danach nicht zusätzlich den Knopf drückst – der Migrator erkennt den Stand aus dem Schema). Neuinstallationen brauchen nichts zu tun.
 
 Außerdem neu: optionaler Proof-of-Work-Spam-Schutz (ALTCHA). Dafür zusätzlich die Ordner `assets/js/altcha/` und `vendor/altcha-org/` **vollständig** hochladen. Aktivierung im Admin-Bereich unter Sicherheit (Standard: aus). Ohne diese Ordner schlägt die Prüfung fehl, sobald die Funktion eingeschaltet wird.
 
@@ -70,9 +78,17 @@ Nichts davon ist für den Betrieb erforderlich — die Installation läuft nach 
 <a id="english"></a>
 # Upgrade Guide (English)
 
-## Upgrading to the version after 1.1.0 (suggestion notifications)
+## General: updating by copying over
 
-New feature: guests can optionally add a quantity and an email address to suggested items and are notified of the decision. After uploading the files, run `migrations/003_suggestion_notify.sql` **once** against the existing database (phpMyAdmin or `mysql -h DB_HOST -u DB_USER -p DB_NAME < migrations/003_suggestion_notify.sql`). Running it twice fails (columns already exist). Fresh installs need no action.
+For every update, copy the files of the new version over the existing installation (`config/config.php` and `uploads/` stay untouched), then, as SuperAdmin, click "Run migrations now" under **Admin → Database update** if anything is pending.
+
+- Not all SQL steps are re-run on every update. Each migration file runs exactly once and is recorded in the `migrations` table; only files that are new are pending.
+- Check the `migrations/` folder on the server: it must contain only files of the current version (plus the `.htaccess`). Files that do not belong there – e.g. leftovers from earlier development states – are shown as "pending" by the migrator. In that case do **not** run them; delete the files instead.
+- Never rename migration files: a renamed file counts as new and would be run again.
+
+## Upgrading to 1.2.0 (suggestion notifications, spam protection, database update)
+
+New feature: guests can optionally add a quantity and an email address to suggested items and are notified of the decision. After uploading the files, log in as SuperAdmin and click "Run migrations now" under **Admin → Database update** (back up the database first). A notice on the dashboard shows while migrations are pending. You no longer need to apply the SQL files by hand (applying them manually via phpMyAdmin/`mysql` still works – the migrator detects the state from the schema). Fresh installs need no action.
 
 ---
 

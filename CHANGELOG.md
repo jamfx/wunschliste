@@ -11,6 +11,8 @@ upgrade.
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-11
+
 ### Security
 
 - Rate limits no longer trust forgeable `X-Forwarded-For` /
@@ -19,6 +21,12 @@ upgrade.
 
 ### Added
 
+- Database migrations from the admin area: Admin → "Database update"
+  (SuperAdmin only) applies pending `migrations/*.sql` files with one click,
+  records them in a `migrations` table and shows a banner on the dashboard
+  while something is pending. Existing installations are detected from their
+  schema (no migration is run twice); fresh installs mark 001–003 as done.
+  New schema changes go into new numbered files (see `migrations/README.md`).
 - Optional proof-of-work captcha ([ALTCHA](https://altcha.org) v3, MIT,
   self-hosted, no cookies, no external requests) for "create list" and
   "suggest an item". Admin → Security: three levels (off / normal / high),
@@ -44,6 +52,14 @@ upgrade.
   links, lists, line breaks). Raw HTML, images and non-http(s) links are
   rendered as plain text. Applies to the guest view, the management page
   and the PDF export.
+
+### Changed
+
+- Wider public pages: content width 800 px → 960 px; form and reading pages
+  (create/edit list, "list created", help, "My Security") share one
+  800 px width (`.content-medium`); header and footer follow the wide
+  admin layout on admin pages.
+- The ALTCHA widget uses the site's primary colour and a higher-contrast frame.
 
 ## [1.1.0] - 2026-08-24
 

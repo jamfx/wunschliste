@@ -10,7 +10,7 @@ if (!defined('CONFIG_PATH')) {
 }
 
 // Bump on every release (see UPGRADE.md); shown in the public footer.
-define('APP_VERSION', '1.1.0');
+define('APP_VERSION', '1.2.0');
 
 // Gift Mode (Geschenkmodus) tuning constants
 define('GIFT_MODE_HEARTBEAT_INTERVAL_MS', 30000);  // JS heartbeat interval
@@ -45,6 +45,7 @@ spl_autoload_register(static function (string $class): void {
 
 require_once BASE_DIR . '/src/Database.php';
 require_once BASE_DIR . '/src/AltchaGuard.php';
+require_once BASE_DIR . '/src/Migrator.php';
 require_once BASE_DIR . '/src/Router.php';
 require_once BASE_DIR . '/src/Translator.php';
 require_once BASE_DIR . '/src/Totp.php';

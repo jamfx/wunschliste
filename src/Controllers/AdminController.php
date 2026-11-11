@@ -386,7 +386,19 @@ class AdminController
             'totalEvents'      => $totalEvents,
             'activeEvents'     => $activeEvents,
             'expiredEvents'    => $expiredEvents,
+            'pendingMigrations' => $this->countPendingMigrations(),
         ]);
+    }
+
+    /** Number of unapplied migrations; 0 if the check itself fails (never break the dashboard). */
+    private function countPendingMigrations(): int
+    {
+        global $db;
+        try {
+            return count((new Migrator($db->getPdo()))->pending());
+        } catch (\Throwable) {
+            return 0;
+        }
     }
 
     /** POST /admin/event/{id}/delete */
@@ -936,6 +948,61 @@ class AdminController
         }
 
         redirect(base_url('admin/settings/security'));
+    }
+
+    /** GET /admin/settings/database — status of the schema migrations */
+    public function databaseSettings(array $params = []): void
+    {
+        global $db;
+        $this->checkAuth();
+
+        $pending  = [];
+        $executed = [];
+        $error    = null;
+        try {
+            $migrator = new Migrator($db->getPdo());
+            $pending  = $migrator->pending();
+            $executed = $migrator->executed();
+        } catch (\Throwable $e) {
+            error_log('Migration status failed: ' . $e->getMessage());
+            $error = $e->getMessage();
+        }
+
+        render('admin/database_settings', [
+            'pageTitle'        => __('admin.settings_database'),
+            'currentAdminPage' => 'database',
+            'containerClass'   => 'container--wide',
+            'pending'          => $pending,
+            'executed'         => $executed,
+            'error'            => $error,
+        ]);
+    }
+
+    /** POST /admin/settings/database — apply all pending migrations */
+    public function runMigrations(array $params = []): void
+    {
+        global $db;
+        $this->checkAuth();
+        if (!csrf_verify()) {
+            abort(403);
+        }
+
+        try {
+            $migrator = new Migrator($db->getPdo());
+            // Server-side check, in case the button is used while nothing is pending.
+            if ($migrator->pending() === []) {
+                flash('success', __('admin.db_up_to_date'));
+                redirect(base_url('admin/settings/database'));
+            }
+            $results  = $migrator->run();
+            $executed = array_column(array_filter($results, fn(array $r) => $r['status'] === 'executed'), 'file');
+            flash('success', __('admin.db_run_success', ['count' => count($executed), 'files' => implode(', ', $executed)]));
+        } catch (\Throwable $e) {
+            error_log('Migration failed: ' . $e->getMessage());
+            flash('error', __('admin.db_run_failed', ['error' => $e->getMessage()]));
+        }
+
+        redirect(base_url('admin/settings/database'));
     }
 
     /** GET /admin/settings/cleanup */

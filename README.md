@@ -2,7 +2,7 @@
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](LICENSE.txt)
 ![PHP](https://img.shields.io/badge/PHP-%3E%3D8.1-777bb4.svg)
-![Version](https://img.shields.io/badge/Version-1.1.0-orange.svg)
+![Version](https://img.shields.io/badge/Version-1.2.0-orange.svg)
 
 <a id="deutsch"></a>
 # Wunschliste

@@ -77,7 +77,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 foreach (split_sql_statements($sql) as $stmt) {
                     $pdo->exec($stmt);
                 }
-            } catch (PDOException $e) {
+                // 001 already contains migrations 001-003: record them, then
+                // apply anything newer (004+) the same way the admin button does.
+                $migrator = new Migrator($pdo);
+                $migrator->markBaselineApplied();
+                $migrator->run();
+            } catch (Throwable $e) {
                 $errors[] = 'Datenbankschema konnte nicht erstellt werden: ' . $e->getMessage();
             }
         }

@@ -14,6 +14,7 @@ $navItems = [
     'pdf'          => ['url' => base_url('admin/pdf-settings'),   'icon' => 'fa-solid fa-file-pdf',         'label' => __('admin.settings_pdf')],
     'security'     => ['url' => base_url('admin/settings/security'), 'icon' => 'fa-solid fa-lock',          'label' => __('admin.settings_security')],
     'cleanup'      => ['url' => base_url('admin/settings/cleanup'),  'icon' => 'fa-solid fa-broom',         'label' => __('admin.settings_cleanup')],
+    'database'     => ['url' => base_url('admin/settings/database'), 'icon' => 'fa-solid fa-database',      'label' => __('admin.settings_database')],
     'account_security' => ['url' => base_url('account/security'),   'icon' => 'fa-solid fa-shield-halved', 'label' => __('admin.account_security')],
 ];
 ?>
