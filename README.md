@@ -20,8 +20,12 @@ Eine Live-Demo findest du unter: **[wunschliste.n-systeme.de](https://wunschlist
 - **Admin-Backend** – SuperAdmin-Account verwaltet die Installation und lädt weitere registrierte User per E-Mail ein; jeder Account kann optional TOTP oder Passkeys als Zwei-Faktor-Authentifizierung einrichten
 - **Zugriffskontrolle** – Listen-Erstellung wahlweise offen für alle oder nur für registrierte User; eigene Listen bleiben dem jeweiligen Account zugeordnet
 - **Mehrsprachig** – Deutsch und Englisch, mit Übersetzungseditor im Admin-Backend
+- **Vorschläge von Gästen** – Gäste können Mitbringsel (optional mit Anzahl) vorschlagen; mit angegebener E-Mail-Adresse erfahren sie, ob der Vorschlag angenommen oder abgelehnt wurde (die Adresse wird danach gelöscht)
+- **Markdown in Beschreibungen** – Fett, kursiv, Links und Listen in Event-Beschreibungen (ohne rohes HTML)
+- **Spam-Schutz** – Mindest-Ausfüllzeit, Filter gegen Links/HTML in Titeln und optional ein selbst gehostetes Proof-of-Work-Captcha ([ALTCHA](https://altcha.org)) – ohne Cookies, ohne externe Dienste, barrierefrei
 - **PDF-Export** – Eventübersichten als PDF exportieren (via Dompdf)
 - **E-Mail-Benachrichtigungen** – SMTP, Brevo API oder Sendmail
+- **Datenbank-Updates per Knopfdruck** – Neue Migrationen werden im Admin-Backend eingespielt, kein manuelles SQL nötig
 - **Theming** – Anpassbare Farben, Logo und Seitentitel
 - **Shared-Hosting-tauglich** – Läuft mit PHP und MySQL, keine besonderen Serveranforderungen
 
@@ -32,13 +36,13 @@ Eine Live-Demo findest du unter: **[wunschliste.n-systeme.de](https://wunschlist
 
 ## Installation
 
-1. Alle Dateien auf den Webserver hochladen.
+1. Alle Dateien (inklusive des Ordners `vendor/`) auf den Webserver hochladen.
 2. Das Installationsskript im Browser aufrufen und dem Setup-Assistenten folgen.
 3. Nach der Installation das Installationsskript löschen oder absichern.
 
 ## Update
 
-Aktualisierst du eine bestehende Installation (nicht neu installieren), folge der **[Upgrade-Anleitung](UPGRADE.md)** — insbesondere ab Version 1.1.0 ist dafür ein einmaliger Datenbank-Migrationsschritt nötig. Was sich zwischen den Versionen im Detail geändert hat, steht im **[Changelog](CHANGELOG.md)**.
+Aktualisierst du eine bestehende Installation (nicht neu installieren), folge der **[Upgrade-Anleitung](UPGRADE.md)**: Dateien drüberkopieren und danach im Admin-Backend unter „Datenbank-Update“ die ausstehenden Migrationen per Knopfdruck einspielen. Was sich zwischen den Versionen im Detail geändert hat, steht im **[Changelog](CHANGELOG.md)**.
 
 ## Konfiguration
 
@@ -61,8 +65,12 @@ You can see a Live-Demo at: **[wunschliste.n-systeme.de](https://wunschliste.n-s
 - **Admin backend** – A SuperAdmin account manages the installation and invites further registered users by email; every account can optionally set up TOTP or passkeys for two-factor authentication
 - **Access control** – List creation can be open to everyone or restricted to registered users; your own lists stay tied to your account
 - **Multilingual** – German and English, with a translation editor in the admin backend
+- **Guest suggestions** – Guests can suggest items (optionally with a quantity); if they give an email address they learn whether the suggestion was accepted or declined (the address is deleted afterwards)
+- **Markdown in descriptions** – Bold, italic, links and lists in event descriptions (no raw HTML)
+- **Spam protection** – Minimum fill time, filtering of links/HTML in titles and an optional self-hosted proof-of-work captcha ([ALTCHA](https://altcha.org)) – no cookies, no external services, accessible
 - **PDF export** – Export event overviews as PDF (via Dompdf)
 - **Email notifications** – SMTP, Brevo API, or sendmail
+- **One-click database updates** – New migrations are applied from the admin backend, no manual SQL needed
 - **Theming** – Customizable colors, logo, and site title
 - **Shared hosting friendly** – Runs on PHP and MySQL, no special server requirements
 
@@ -79,7 +87,7 @@ You can see a Live-Demo at: **[wunschliste.n-systeme.de](https://wunschliste.n-s
 
 ## Updating
 
-Updating an existing installation (not a fresh install)? Follow the **[upgrade guide](UPGRADE.md)** — starting with version 1.1.0, this requires a one-time database migration step. See the **[changelog](CHANGELOG.md)** for what changed between versions.
+Updating an existing installation (not a fresh install)? Follow the **[upgrade guide](UPGRADE.md)**: copy the files over, then apply pending migrations with one click under "Database update" in the admin backend. See the **[changelog](CHANGELOG.md)** for what changed between versions.
 
 ## Configuration
 
